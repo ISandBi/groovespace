@@ -1,0 +1,219 @@
+.staff-layout {
+  padding: 32px 24px 120px 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Contenedor de cabecera aislado para evitar empalmes */
+.header-staff-flex {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.btn-back-console {
+  background-color: var(--color-surface-card);
+  border: 1px solid var(--color-border-default);
+  color: var(--color-brand-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-back-console:hover {
+  background-color: var(--color-brand-primary);
+  color: #ffffff;
+  border-color: var(--color-brand-primary);
+}
+
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+@media (max-width: 640px) {
+  .metrics-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .metric-card {
+    min-width: 0;
+    padding: 14px;
+  }
+
+  .metric-number {
+    font-size: 20px;
+    overflow-wrap: anywhere;
+  }
+}
+
+.metric-card {
+  background-color: #ffffff;
+  border: 1px solid var(--color-border-default);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.01);
+}
+
+.metric-card h5 {
+  margin: 0 0 6px 0;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--color-text-muted);
+}
+
+.metric-number {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--color-text-title);
+  margin: 0;
+}
+
+.table-container-lux {
+  background-color: #ffffff;
+  border: 1px solid var(--color-border-default);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+}
+
+.staff-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14px;
+}
+
+.staff-table th {
+  background-color: var(--color-surface-dark);
+  color: var(--color-text-onDark);
+  padding: 16px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.staff-table td {
+  padding: 16px;
+  border-bottom: 1px solid var(--color-border-default);
+  color: var(--color-text-body);
+  vertical-align: middle;
+}
+
+.band-mini-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border-default);
+  object-fit: cover;
+}
+
+.btn-delete-band {
+  border: 1px solid rgba(220, 53, 69, .35);
+  border-radius: 8px;
+  background: rgba(220, 53, 69, .08);
+  color: var(--color-state-error);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.btn-delete-band:hover:not(:disabled) {
+  background: var(--color-state-error);
+  color: #fff;
+}
+
+.btn-delete-band:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
+.badge-status {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  display: inline-block;
+}
+
+.badge-status.success {
+  background-color: rgba(25, 135, 84, 0.1);
+  color: var(--color-booking-available);
+}
+
+/* Estilos de la Pantalla de Ticket Premium */
+.ticket-container {
+  max-width: 420px;
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 24px;
+  padding: 32px 24px;
+  box-sizing: border-box;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+  border: 1px solid var(--color-border-default);
+  position: relative;
+}
+
+.ticket-header-brand {
+  text-align: center;
+  border-bottom: 2px dashed var(--color-border-default);
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+}
+
+.ticket-row-detail {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  font-size: 14px;
+}
+
+.ticket-label-muted {
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.ticket-value-bold {
+  color: var(--color-text-title);
+  font-weight: 700;
+}
+
+.ticket-divider-line {
+  border-top: 1px solid var(--color-border-default);
+  margin: 18px 0;
+}
+
+.barcode-simulated-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 2px dashed var(--color-border-default);
+}
+
+.barcode-bars {
+  width: 80%;
+  height: 45px;
+  background: linear-gradient(90deg, #000 2px, transparent 2px, #000 5px, transparent 1px, #000 8px, transparent 4px, #000 12px, transparent 2px, #000 15px, transparent 5px, #000 22px, transparent 1px, #000 26px, transparent 3px, #000 32px);
+  background-size: 40px 100%;
+}

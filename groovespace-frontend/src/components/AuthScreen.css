@@ -1,0 +1,69 @@
+.input-corporate {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 2px solid var(--color-border-default);
+  background-color: #ffffff;
+  color: var(--color-text-title);
+  font-size: 16px;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.input-corporate:focus {
+  border-color: var(--color-border-focus);
+}
+
+.band-email-composer {
+  display: grid;
+  grid-template-columns: minmax(80px, 1fr) auto minmax(145px, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.band-email-at {
+  color: var(--color-text-title);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.band-email-domain {
+  min-width: 0;
+  padding-right: 28px;
+}
+
+.form-label-lux {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--color-text-body);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Botón Corporativo de Registro y Avance */
+.btn-action-submit-grand {
+  width: 100%;
+  background-color: var(--color-brand-primary); /* #8449FD Oficial */
+  color: var(--color-text-onDark);
+  border: none;
+  padding: 18px;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-action-submit-grand:active {
+  background-color: var(--color-action-primaryActive);
+  transform: scale(0.98);
+}
