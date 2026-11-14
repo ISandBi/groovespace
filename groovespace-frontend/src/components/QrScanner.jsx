@@ -5,9 +5,49 @@ import { toast } from '../ui/kit.jsx';
 import './QrScanner.css';
 
 const CODE = /^(GS|GE)-[A-F\d]{16}$/;
+// Decodificador de respaldo (jsQR): igual que en DeskFlex, se usa cuando el navegador no trae BarcodeDetector
+// (Chrome/Edge en Windows y Firefox no lo tienen). Se busca primero en /vendor y luego en varios CDN.
+const JSQR_SOURCES = ['/vendor/jsQR.js', 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js', 'https://unpkg.com/jsqr@1.4.0/dist/jsQR.js', 'https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js'];
+const loadScript = (src) => new Promise((resolve, reject) => { const tag = document.createElement('script'); tag.src = src; tag.onload = resolve; tag.onerror = () => { tag.remove(); reject(new Error(src)); }; document.head.appendChild(tag); });
+const loadJsQr = async () => {
+  if (window.jsQR) return window.jsQR;
+  for (const src of JSQR_SOURCES) { try { await loadScript(src); if (window.jsQR) return window.jsQR; } catch { /* siguiente fuente */ } }
+  return null;
+};
+// Devuelve una función que lee un cuadro del video y regresa el texto del QR (o null).
+const makeDecoder = async (video) => {
+  if ('BarcodeDetector' in window) {
+    try {
+      if ((await window.BarcodeDetector.getSupportedFormats()).includes('qr_code')) {
+        const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
+        return async () => (await detector.detect(video))[0]?.rawValue || null;
+      }
+    } catch { /* usa jsQR */ }
+  }
+  const jsQR = await loadJsQr();
+  if (!jsQR) return null;
+  const canvas = document.createElement('canvas'); const context = canvas.getContext('2d', { willReadFrequently: true });
+  return async () => {
+    const width = video.videoWidth; if (!width) return null;
+    const k = Math.min(1, 720 / width); canvas.width = Math.round(width * k); canvas.height = Math.round(video.videoHeight * k);
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const image = context.getImageData(0, 0, canvas.width, canvas.height);
+    return jsQR(image.data, image.width, image.height, { inversionAttempts: 'attemptBoth' })?.data || null;
+  };
+};
+const cameraError = (error) => {
+  if (!window.isSecureContext || !navigator.mediaDevices) return 'El navegador sólo permite la cámara en https:// o en http://localhost. Abre el sistema con esa dirección.';
+  switch (error?.name) {
+    case 'NotAllowedError': case 'SecurityError': return 'El permiso de cámara está bloqueado. Pulsa el candado junto a la dirección, permite la cámara y vuelve a intentar.';
+    case 'NotFoundError': case 'OverconstrainedError': return 'No se detectó ninguna cámara en este equipo.';
+    case 'NotReadableError': case 'AbortError': return 'La cámara está en uso por otra aplicación (Zoom, Teams, otra pestaña). Ciérrala e inténtalo de nuevo.';
+    default: return `No se pudo abrir la cámara (${error?.name || 'error'}). Escribe el código mientras tanto.`;
+  }
+};
+
 const clean = (raw) => String(raw || '').trim().toUpperCase().replace(/^GROOVESPACE:/, '');
 
-/** Lector de QR para recepción: cámara (BarcodeDetector) o código escrito / lector USB. Soporta boletos de sesión (GS-) y de evento (GE-). */
+/** Lector de QR para recepción: cámara (BarcodeDetector o jsQR) o código escrito / lector USB. Soporta boletos de sesión (GS-) y de evento (GE-). */
 export default function QrScanner({ token, onChange }) {
   const video = useRef(null);
   const stream = useRef(null);
@@ -17,7 +57,10 @@ export default function QrScanner({ token, onChange }) {
   const [manual, setManual] = useState('');
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
-  const supported = typeof window !== 'undefined' && 'BarcodeDetector' in window && Boolean(navigator.mediaDevices?.getUserMedia);
+  const [cameras, setCameras] = useState([]);
+  const [deviceId, setDeviceId] = useState('');
+  const [starting, setStarting] = useState(false);
+  const supported = true; // siempre se intenta abrir la cámara; si falla se explica el motivo
 
   const lookup = useCallback(async (raw) => {
     const code = clean(raw);
@@ -38,23 +81,34 @@ export default function QrScanner({ token, onChange }) {
     if (!active) return undefined;
     let timer; let cancelled = false;
     (async () => {
+      setStarting(true); setError('');
       try {
-        const media = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+        if (!navigator.mediaDevices?.getUserMedia) throw Object.assign(new Error('insecure'), { name: 'SecurityError' });
+        const attempts = deviceId ? [{ video: { deviceId: { exact: deviceId } }, audio: false }]
+          : [{ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 } }, audio: false }, { video: true, audio: false }];
+        let media = null; let lastError;
+        for (const constraints of attempts) { try { media = await navigator.mediaDevices.getUserMedia(constraints); break; } catch (e) { lastError = e; if (e.name === 'NotAllowedError') break; } }
+        if (!media) throw lastError;
         if (cancelled) { media.getTracks().forEach((track) => track.stop()); return; }
         stream.current = media; video.current.srcObject = media; await video.current.play();
-        const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
+        navigator.mediaDevices.enumerateDevices().then((list) => setCameras(list.filter((d) => d.kind === 'videoinput'))).catch(() => {});
+        const decode = await makeDecoder(video.current);
+        if (cancelled) return;
+        if (!decode) { setError('La cámara funciona, pero no se pudo cargar el decodificador de QR (revisa tu internet). Escribe el código mientras tanto.'); return; }
+        setStarting(false);
         const tick = async () => {
           if (cancelled) return;
           if (!busyRef.current && video.current?.readyState >= 2) {
-            try { const found = await detector.detect(video.current); const text = found[0]?.rawValue; if (text && text !== lastCode.current) { lastCode.current = text; lookup(text); setTimeout(() => { lastCode.current = ''; }, 4000); } } catch { /* cuadro sin QR */ }
+            try { const text = await decode(); if (text && text !== lastCode.current) { lastCode.current = text; lookup(text); setTimeout(() => { lastCode.current = ''; }, 4000); } } catch { /* cuadro sin QR */ }
           }
-          timer = setTimeout(tick, 220);
+          timer = setTimeout(tick, 150);
         };
         tick();
-      } catch { setError('No se pudo abrir la cámara. Revisa el permiso o usa el código manual.'); setActive(false); }
+      } catch (e) { if (!cancelled) { setError(cameraError(e)); stop(); } }
+      finally { setStarting(false); }
     })();
-    return () => { cancelled = true; clearTimeout(timer); };
-  }, [active, lookup]);
+    return () => { cancelled = true; clearTimeout(timer); stream.current?.getTracks().forEach((track) => track.stop()); stream.current = null; };
+  }, [active, deviceId, lookup, stop]);
 
   const confirm = async () => {
     try {
@@ -69,11 +123,12 @@ export default function QrScanner({ token, onChange }) {
       <div>
         <div className={`qrs-view ${result?.verdict || ''}`}>
           <video ref={video} muted playsInline style={{ display: active ? 'block' : 'none' }} />
-          {!active && <div className="qrs-idle"><FaQrcode size={54} color="var(--color-brand-primary)" /><b style={{ color: 'var(--color-text-title)' }}>Escáner de boletos</b><span>{supported ? 'Apunta la cámara al QR del boleto.' : 'Este navegador no lee QR con la cámara: escribe el código o usa un lector USB.'}</span></div>}
+          {!active && <div className="qrs-idle"><FaQrcode size={54} color="var(--color-brand-primary)" /><b style={{ color: 'var(--color-text-title)' }}>Escáner de boletos</b><span>Activa la cámara y apunta al QR del boleto, o escribe el código / usa un lector USB.</span></div>}
           <div className="qrs-frame"><i /><i /><i /><i />{active && <span className="qrs-line" />}</div>
         </div>
         <div className="gs-row" style={{ justifyContent: 'center', marginTop: 16 }}>
-          {supported && <button className="gs-btn gs-btn--primary" onClick={() => (active ? stop() : setActive(true))}><FaCamera /> {active ? 'Cerrar cámara' : 'Activar cámara'}</button>}
+          {supported && <button className="gs-btn gs-btn--primary" onClick={() => (active ? stop() : setActive(true))}><FaCamera /> {active ? 'Cerrar cámara' : starting ? 'Abriendo…' : 'Activar cámara'}</button>}
+          {active && cameras.length > 1 && <select className="gs-input" style={{ maxWidth: 220 }} value={deviceId} onChange={(event) => setDeviceId(event.target.value)} aria-label="Cámara"><option value="">Cámara automática</option>{cameras.map((cam, index) => <option key={cam.deviceId} value={cam.deviceId}>{cam.label || `Cámara ${index + 1}`}</option>)}</select>}
         </div>
         <form className="gs-row" style={{ marginTop: 14, flexWrap: 'nowrap' }} onSubmit={(event) => { event.preventDefault(); lookup(manual); setManual(''); }}>
           <input className="gs-input" style={{ fontFamily: 'ui-monospace,monospace' }} value={manual} onChange={(event) => setManual(event.target.value)} placeholder="GS-0123456789ABCDEF o GE-…" aria-label="Código del boleto" autoComplete="off" />
