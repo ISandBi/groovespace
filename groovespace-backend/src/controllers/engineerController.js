@@ -1,5 +1,7 @@
 const crypto = require('crypto');
 const Reservation = require('../models/Reservation');
+const Band = require('../models/Band');
+const { HOLD_MS } = require('../config/payment');
 const { engineers } = require('../config/engineers');
 const { createEngineerToken } = require('../middlewares/engineerAuth');
 const { constantTimeEquals } = require('../middlewares/staffAuth');
@@ -25,15 +27,37 @@ exports.login = (req, res) => {
 
 exports.getSchedule = async (req, res) => {
   try {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
+    const holdCutoff = new Date(Date.now() - HOLD_MS);
+    // Sesiones confirmadas y también las apartadas que aún están dentro de sus 12 horas para pagar el anticipo.
     const reservations = await Reservation.find({
       engineerId: req.engineerId,
       date: { $gte: today },
-      paymentStatus: { $in: ['deposit_paid', 'paid'] },
-      isDemo: { $ne: true }
+      isDemo: { $ne: true },
+      $or: [
+        { paymentStatus: { $in: ['deposit_paid', 'paid'] } },
+        { paymentStatus: 'deposit_pending', createdAt: { $gte: holdCutoff } }
+      ]
     }).populate('bandId', 'name leaderName').sort({ date: 1, startTime: 1 });
     return res.status(200).json(reservations);
   } catch {
     return res.status(500).json({ error: 'No se pudo cargar tu agenda de sesiones.' });
+  }
+};
+
+exports.getAssignedBands = async (req, res) => {
+  try {
+    const bands = await Band.find({ requiresEngineer: true, engineerId: req.engineerId })
+      .select('name leaderName members instruments createdAt').sort({ createdAt: -1 });
+    return res.status(200).json(bands.map((band) => ({
+      _id: band._id,
+      name: band.name,
+      leaderName: band.leaderName,
+      membersCount: band.members?.length || 0,
+      instrumentsCount: band.instruments?.length || 0,
+      assignedAt: band.createdAt
+    })));
+  } catch {
+    return res.status(500).json({ error: 'No se pudieron cargar tus bandas asignadas.' });
   }
 };

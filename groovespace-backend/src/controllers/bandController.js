@@ -1,3 +1,5 @@
+const { provisionalLogoPath } = require('../modules/branding/logo');
+const { createMemberToken } = require('../middlewares/actor');
 const Band = require('../models/Band');
 const Reservation = require('../models/Reservation');
 const ReservationSlot = require('../models/ReservationSlot');
@@ -9,6 +11,7 @@ const { createBandToken } = require('../middlewares/bandAuth');
 const paymentController = require('./paymentController');
 const { engineers } = require('../config/engineers');
 const { ensureDefaultBandEmailDomains } = require('../config/bandEmailDomains');
+const cascade = require('../modules/bands/cascade');
 
 const hashToken = (token) => crypto.createHash('sha256').update(token).digest('hex');
 
@@ -37,7 +40,7 @@ exports.registerBand = async (req, res) => {
 
     const logoFile = req.files?.logo?.[0];
     if (!logoFile) {
-      return res.status(400).json({ error: 'Es obligatorio cargar la identidad visual (Logo) de la agrupación.' });
+      // Sin logo propio se asigna un logo provisional de GrooveSpace (se puede reemplazar después).
     }
 
     let instrumentNames;
@@ -63,7 +66,7 @@ exports.registerBand = async (req, res) => {
       return res.status(400).json({ error: 'Esta agrupación ya se encuentra registrada en el sistema.' });
     }
 
-    const logoPath = `/uploads/${logoFile.filename}`;
+    const logoPath = logoFile ? `/uploads/${logoFile.filename}` : provisionalLogoPath(name.trim());
     const inviteToken = crypto.randomBytes(32).toString('hex');
     const passwordSalt = crypto.randomBytes(16).toString('hex');
     const passwordHash = crypto.scryptSync(password, passwordSalt, 64).toString('hex');
@@ -75,6 +78,7 @@ exports.registerBand = async (req, res) => {
       passwordHash,
       passwordSalt,
       logoPath,
+      logoProvisional: !logoFile,
       requiresEngineer: needsEngineer,
       engineerId: needsEngineer ? engineerId : null,
       instruments: instrumentNames.map((instrument, index) => ({
@@ -256,7 +260,13 @@ exports.joinBand = async (req, res) => {
     if (!updatedBand) {
       return res.status(409).json({ error: 'La banda ya alcanzó el máximo de 100 integrantes.' });
     }
-    return res.status(201).json({ message: 'Te uniste a la banda.', bandName: band.name });
+    const member = updatedBand.members[updatedBand.members.length - 1];
+    return res.status(201).json({
+      message: 'Te uniste a la banda.',
+      bandName: band.name,
+      // Sesión de integrante: permite ver el calendario, confirmar asistencia y pagar su parte.
+      memberSession: { memberId: member.id, bandId: band.id, name: member.name, role: member.role, accessToken: createMemberToken({ memberId: member.id, bandId: band.id, role: member.role }) }
+    });
   } catch {
     return res.status(500).json({ error: 'No se pudo agregar al integrante.' });
   }
@@ -284,11 +294,14 @@ exports.deleteBand = async (req, res) => {
   let deletedReservations = 0;
   let deletedSlots = 0;
   let transactionUnavailable = false;
+  let purgeSnapshot;
   try {
     const currentBand = await Band.findById(req.params.bandId).select('_id');
     if (!currentBand) return res.status(404).json({ error: 'No se encontró la banda.' });
     const reservationsWithCheckout = await Reservation.find({ bandId: currentBand._id })
-      .select('stripeDepositSessionId stripeBalanceSessionId');
+      .select('depositOrderId balanceOrderId');
+    const fullBand = await Band.findById(currentBand._id).select('members');
+    purgeSnapshot = await cascade.snapshot(fullBand, reservationsWithCheckout.map(({ _id }) => _id));
     await paymentController.expireOpenCheckoutSessions(reservationsWithCheckout);
 
     session = await mongoose.startSession();
@@ -340,6 +353,7 @@ exports.deleteBand = async (req, res) => {
   }
 
   if (!deletedBand) return res.status(404).json({ error: 'No se encontró la banda.' });
+  if (purgeSnapshot) cascade.purge(purgeSnapshot).catch((error) => console.error('[GrooveSpace] Limpieza posterior al borrado incompleta.', error.message));
 
   let deletedFiles = 0;
   const fileFailures = [];

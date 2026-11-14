@@ -27,3 +27,6 @@ exports.requireBand = (req, res, next) => {
     return res.status(401).json({ error: 'Sesión de banda no válida.' });
   }
 };
+
+// Igual que requireBand, pero permite llamadas sin sesión (compras públicas). Con una sesión inválida, responde 401.
+exports.optionalBand = (req, res, next) => (req.headers.authorization ? exports.requireBand(req, res, next) : next());

@@ -1,48 +1,28 @@
-import { useEffect, useState } from 'react';
-import { FaSignOutAlt, FaGuitar } from 'react-icons/fa';
-import './components/RoomGrid.css'; 
-import BookingScreen from './components/BookingScreen';
-import AuthScreen from './components/AuthScreen';
-import StaffDashboard from './components/StaffDashboard'; 
-import StaffLogin from './components/StaffLogin';
-import InviteScreen from './components/InviteScreen';
-import PaymentReturn from './components/PaymentReturn';
-import BandProfile from './components/BandProfile';
-import EngineerLogin from './components/EngineerLogin';
-import EngineerPanel from './components/EngineerPanel';
+import { useEffect, useState, lazy, Suspense } from 'react';
+import './index.css';
+import './ui/design.css';
+import { API_URL, installQaRequestTagging } from './api';
+import { api } from './lib/http';
+import { Redirect, match, navigate, useLocation } from './lib/router.jsx';
+import { saveSession, useSessions } from './lib/session';
+import { Shell } from './ui/Shell.jsx';
+import { Toaster, Skeleton } from './ui/kit.jsx';
 import IntroScreen from './components/IntroScreen';
 import QaMonitor from './components/QaMonitor';
-import { API_URL, installQaRequestTagging } from './api';
+import SimulatedCheckout from './components/SimulatedCheckout';
+import PaymentReturn from './components/PaymentReturn';
+import InviteScreen from './components/InviteScreen';
+import Home from './pages/Home.jsx';
+import Quote from './pages/Quote.jsx';
+import Booking from './pages/Booking.jsx';
+import Access from './pages/Access.jsx';
+import { Directory, PublicEpk, Events, Engineers } from './pages/Public.jsx';
+
+const Portal = lazy(() => import('./pages/Portal.jsx'));
+const EngineerArea = lazy(() => import('./pages/EngineerArea.jsx'));
+const StaffArea = lazy(() => import('./pages/StaffArea.jsx'));
 
 installQaRequestTagging();
-
-function RoomGridCard({ room, onSelect }) {
-  return (
-    <div className="studio-square-card" onClick={() => onSelect(room)}>
-      <div className="card-square-media">
-        <div className="live-badge-mini">Disponible</div>
-        <img 
-          src={room.imagePath} 
-          alt={room.name} 
-          className="square-img-file" 
-        />
-      </div>
-      <div className="card-square-info">
-        <div>
-          <h3 className="room-grid-title">{room.name}</h3>
-          <p className="room-grid-spec">{room.capacity} Integrantes máximo</p>
-          {room.customizable && <p className="room-grid-spec">Personalización 3D incluida</p>}
-        </div>
-        <div className="room-grid-price-row">
-          <div className="grid-price-tag">
-            ${room.price}<span>/hr</span>
-          </div>
-          <button className="btn-grid-action">Ver</button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function App() {
   useEffect(() => {
@@ -118,181 +98,48 @@ export default function App() {
   }, []);
 
   const [hasEntered, setHasEntered] = useState(() => sessionStorage.getItem('groovespace.introSeen') === 'true');
-  const [bandSession, setBandSession] = useState(() => {
-    try { return JSON.parse(sessionStorage.getItem('groovespace.bandSession') || 'null'); }
-    catch { return null; }
-  });
-  const [selectedRoom, setSelectedRoom] = useState(null);
-  const [isAuthenticating, setIsAuthenticating] = useState(false);
-  
-  const [staffToken, setStaffToken] = useState('');
-  const [engineerSession, setEngineerSession] = useState(null);
-  const currentPath = window.location.pathname.replace(/\/+$/, '') || '/';
-  const isQaRoute = currentPath === '/qa';
-  const isBandProfileRoute = currentPath === '/banda' || currentPath === '/banda/perfil';
-  const isStaffRoute = currentPath === '/administracion' || currentPath === '/administracion/login';
-  const isEngineerRoute = currentPath === '/ingenieria' || currentPath === '/ingenieria/login';
-  const inviteToken = window.location.pathname.match(/^\/invite\/([^/]+)$/)?.[1];
-  const paymentState = new URLSearchParams(window.location.search).get('payment');
+  const { path, search } = useLocation();
+  const sessions = useSessions();
+  const params = new URLSearchParams(search);
+  const paymentState = params.get('payment');
+  const memberAccess = params.get('member_access');
 
-  const roomsData = [
-    { id: 'sala_estudio_a', name: 'Sala Estudio A (Premium Master)', capacity: 6, price: 350, imagePath: '/sala-estudio-a.jpg', customizable: true },
-    { id: 'sala_ensayo_b', name: 'Sala Ensayo B (Sincronizada)', capacity: 4, price: 220, imagePath: '/sala-estudio-b.jpg' },
-    { id: 'sala_production_c', name: 'Sala Production C (Dolby Atmos)', capacity: 3, price: 400, imagePath: '/sala-estudio-c.jpg' },
-    { id: 'sala_live_d', name: 'Sala Live Session D (Live Room)', capacity: 8, price: 500, imagePath: '/sala-estudio-d.jpg' },
-    { id: 'sala_orquesta_e', name: 'Sala E · Orquesta', capacity: 100, price: 650, imagePath: '/sala-estudio-e-orquesta.jpg', customizable: true }
-  ];
+  // Enlace personal de integrante (?member_access=…): abre la sesión del integrante y limpia la URL.
+  useEffect(() => {
+    if (!memberAccess) return;
+    api('/band/me', { token: memberAccess }).then((me) => {
+      saveSession('member', { memberId: me.type, bandId: me.bandId, bandName: me.bandName, name: me.name, role: me.role, accessToken: memberAccess });
+      navigate('/banda', { replace: true });
+    }).catch(() => navigate('/', { replace: true }));
+  }, [memberAccess]);
 
-  const scrollToCatalog = () => {
-    document.getElementById('catalog').scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const handleSelectRoom = (room) => {
-    setSelectedRoom(room);
-    if (!bandSession) {
-      setIsAuthenticating(true);
-    }
-  };
-
-  const handleStaffLogout = () => {
-    setStaffToken('');
-    window.location.assign('/');
-  };
-
-  const handleEngineerLogout = () => {
-    setEngineerSession(null);
-    window.location.assign('/');
-  };
-
-  // CIERRE DE SESIÓN COMPLETO: Resetea de forma estricta todos los estados
-  const handleMusicianLogout = () => {
-    setBandSession(null);
-    sessionStorage.removeItem('groovespace.bandSession');
-    setSelectedRoom(null);
-    setIsAuthenticating(false);
-  };
-
-  if (isQaRoute) return <QaMonitor />;
-
+  if (path === '/qa') return <QaMonitor />;
   if (!hasEntered) {
-    return <IntroScreen onEnter={() => {
-      sessionStorage.setItem('groovespace.introSeen', 'true');
-      setHasEntered(true);
-    }} />;
-  }
-  if (inviteToken) return <InviteScreen token={inviteToken} />;
-  if (paymentState) return <PaymentReturn />;
-
-  if (isBandProfileRoute) {
-    if (!bandSession) {
-      return (
-        <AuthScreen
-          onLoginSuccess={(data) => {
-            setBandSession(data);
-            sessionStorage.setItem('groovespace.bandSession', JSON.stringify(data));
-          }}
-          onCancel={() => window.location.assign('/')}
-        />
-      );
-    }
-    return <BandProfile bandInfo={bandSession} onClose={() => window.location.assign('/')} />;
+    return <IntroScreen onEnter={() => { sessionStorage.setItem('groovespace.introSeen', 'true'); setHasEntered(true); }} />;
   }
 
-  if (isEngineerRoute && !engineerSession) {
-    return <EngineerLogin onLoginSuccess={setEngineerSession} onCancel={() => window.location.assign('/')} />;
+  const inviteToken = path.match(/^\/invite\/([^/]+)$/)?.[1];
+  let page;
+  let params2;
+  if (memberAccess) page = <div className="gs-page"><Skeleton rows={2} /></div>;
+  else if (inviteToken) page = <InviteScreen token={inviteToken} />;
+  else if (paymentState === 'simulated') page = <SimulatedCheckout />;
+  else if (paymentState) page = <PaymentReturn />;
+  else if (path === '/') page = <Home />;
+  else if ((params2 = match('/cotizar/:roomId', path))) page = <Quote roomId={params2.roomId} />;
+  else if ((params2 = match('/reservar/:roomId', path))) page = <Booking roomId={params2.roomId} />;
+  else if (path === '/registro' || path === '/ingreso') {
+    const next = params.get('next') || '/banda';
+    page = (sessions.band || sessions.member) ? <Redirect to={next} /> : <Access startRegister={path === '/registro'} intro={next.startsWith('/reservar') ? 'Tu cotización se conserva: al terminar eliges fecha y pagas al contado o con anticipo.' : undefined} onSuccess={(data) => { saveSession('band', data); navigate(next, { replace: true }); }} />;
   }
-  if (isEngineerRoute && engineerSession) {
-    return <EngineerPanel session={engineerSession} onClose={handleEngineerLogout} />;
-  }
+  else if (path === '/bandas') page = <Directory />;
+  else if ((params2 = match('/b/:slug', path))) page = <PublicEpk slug={params2.slug} />;
+  else if (path === '/eventos') page = <Events />;
+  else if (path === '/ingenieros') page = <Engineers />;
+  else if (path.startsWith('/banda')) page = (sessions.band || sessions.member) ? <Suspense fallback={<div className="gs-page"><Skeleton rows={4} /></div>}><Portal /></Suspense> : <Redirect to="/ingreso?next=/banda" />;
+  else if (path.startsWith('/ingenieria')) page = <Suspense fallback={<div className="gs-page"><Skeleton rows={4} /></div>}><EngineerArea /></Suspense>;
+  else if (path.startsWith('/administracion')) page = <Suspense fallback={<div className="gs-page"><Skeleton rows={4} /></div>}><StaffArea /></Suspense>;
+  else page = <div className="gs-page"><h1 className="gs-h1">Página no encontrada</h1></div>;
 
-  if (isStaffRoute && !staffToken) {
-    return (
-      <StaffLogin 
-        onLoginSuccess={setStaffToken}
-        onCancel={() => window.location.assign('/')}
-      />
-    );
-  }
-
-  if (isStaffRoute && staffToken) {
-    return <StaffDashboard onClose={handleStaffLogout} token={staffToken} />;
-  }
-
-  if (isAuthenticating) {
-    return (
-      <AuthScreen 
-        onLoginSuccess={(data) => {
-          // Guardar el objeto tal cual viene del backend (incluyendo el _id nativo)
-          setBandSession(data);
-          sessionStorage.setItem('groovespace.bandSession', JSON.stringify(data));
-          setIsAuthenticating(false);
-        }} 
-        onCancel={() => {
-          setIsAuthenticating(false);
-          setSelectedRoom(null);
-        }} 
-      />
-    );
-  }
-
-  if (selectedRoom && bandSession) {
-    return (
-      <BookingScreen 
-        room={selectedRoom} 
-        bandInfo={bandSession} 
-        onClose={() => setSelectedRoom(null)} 
-      />
-    );
-  }
-
-  return (
-    <div style={{ backgroundColor: 'var(--color-surface-background)', minHeight: '100vh' }}>
-      <header className="tesla-header">
-        {bandSession ? (
-          <div>
-            <h1 className="brand-title" style={{ fontSize: '16px' }}>{bandSession.bandName}</h1>
-            <span style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>Líder: {bandSession.leaderName}</span>
-          </div>
-        ) : (
-          <h1 className="brand-title">GrooveSpace</h1>
-        )}
-        
-        {bandSession ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <a href="/banda" aria-label="Mi banda" title="Mi banda" style={{ color: 'var(--color-text-muted)' }}><FaGuitar size={16} /></a>
-            <button onClick={handleMusicianLogout} aria-label="Cerrar sesión" title="Cerrar sesión" style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}><FaSignOutAlt size={16} /></button>
-          </div>
-        ) : <a href="/banda" aria-label="Acceso de banda" title="Acceso de banda" style={{ color: 'var(--color-text-onDark)' }}><FaGuitar size={16} /></a>}
-      </header>
-
-      <section className="hero-cinematic-container">
-        <img 
-          src="/header-image.webp" 
-          alt="GrooveSpace Premium Studio" 
-          className="hero-background-image" 
-        />
-        <div className="hero-overlay-content">
-          <p className="hero-tagline">Estudios de Alta Escala</p>
-          <h2 className="hero-title">Tu ritmo, tu espacio.</h2>
-          <p className="hero-subtitle">Reserva salas de ensayo y grabación profesionales en tiempo real desde tu dispositivo móvil.</p>
-          <button className="btn-tesla-primary" onClick={scrollToCatalog}>
-            Explorar Catálogo
-          </button>
-        </div>
-      </section>
-
-      <main id="catalog" className="catalog-section">
-        <div className="catalog-header-block">
-          <h2 className="catalog-title">Salas Disponibles</h2>
-          <p className="catalog-subtitle">Selecciona un módulo de audio para bloquear el horario en la CDMX</p>
-        </div>
-        
-        <div className="rooms-high-density-grid">
-          {roomsData.map(room => (
-            <RoomGridCard key={room.id} room={room} onSelect={handleSelectRoom} />
-          ))}
-        </div>
-      </main>
-    </div>
-  );
+  return <Shell>{page}<Toaster /></Shell>;
 }
