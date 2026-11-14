@@ -1,0 +1,35 @@
+/* Boleto GrooveSpace en 3D: se inclina con el ratón/dedo y refleja un brillo que sigue al puntero. */
+.t3d-scene { perspective: 1100px; width: min(720px, 100%); margin: 8px auto 4px; }
+.t3d { --rx: 0deg; --ry: 0deg; --mx: 50%; --my: 50%; --shine: 0; position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 210px; aspect-ratio: 2.25 / 1; min-height: 250px; border-radius: 22px; color: var(--color-text-title); transform-style: preserve-3d; transform: rotateX(var(--rx)) rotateY(var(--ry)); transition: transform .18s ease-out, box-shadow .3s; box-shadow: 0 30px 60px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.09); background: radial-gradient(120% 140% at 0% 0%, #2c2140 0, #1d1725 45%, #100d17 100%); overflow: hidden; animation: t3dFloat 7s ease-in-out infinite; }
+.t3d.is-active { animation: none; transition: transform .06s linear, box-shadow .3s; box-shadow: 0 40px 80px rgba(0,0,0,.6), 0 0 40px rgba(194,255,60,.12), 0 0 0 1px rgba(194,255,60,.35); }
+@keyframes t3dFloat { 0%, 100% { transform: rotateX(2deg) rotateY(-3deg) translateY(0); } 50% { transform: rotateX(-2deg) rotateY(3deg) translateY(-6px); } }
+.t3d::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(115deg, transparent 0 22px, rgba(255,255,255,.018) 22px 23px); pointer-events: none; }
+.t3d-bars { position: absolute; left: 0; right: 210px; bottom: 0; height: 54px; display: flex; align-items: end; gap: 4px; padding: 0 26px; opacity: .22; pointer-events: none; }
+.t3d-bars i { flex: 1; border-radius: 3px 3px 0 0; background: var(--color-brand-primary); transform-origin: bottom; animation: gsBars 1.6s ease-in-out infinite; }
+.t3d-main { position: relative; padding: 24px 26px 22px; display: flex; flex-direction: column; gap: 10px; transform: translateZ(26px); z-index: 1; min-width: 0; }
+.t3d-brand { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 900; letter-spacing: .2em; text-transform: uppercase; color: var(--color-brand-primary); }
+.t3d-brand i { width: 20px; height: 20px; border-radius: 6px; background: var(--color-brand-primary); color: #100d17; display: grid; place-items: center; font-style: normal; font-size: 12px; letter-spacing: 0; }
+.t3d-title { margin: 0; font-size: clamp(20px, 3.4vw, 28px); line-height: 1.1; letter-spacing: -.01em; overflow-wrap: anywhere; }
+.t3d-sub { margin: 0; color: var(--color-brand-accent); font-weight: 800; font-size: 13px; }
+.t3d-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 10px 16px; margin: 6px 0 0; }
+.t3d-details dt { font-size: 9px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--color-text-muted); }
+.t3d-details dd { margin: 2px 0 0; font-size: 14px; font-weight: 800; }
+.t3d-foot { margin-top: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.t3d-code { font-family: ui-monospace, Menlo, monospace; font-size: 12px; letter-spacing: .1em; color: var(--color-text-muted); }
+.t3d-stub { position: relative; display: grid; place-items: center; gap: 8px; padding: 18px; border-left: 2px dashed rgba(255,255,255,.16); transform: translateZ(40px); z-index: 1; }
+.t3d-stub::before, .t3d-stub::after { content: ''; position: absolute; left: -12px; width: 22px; height: 22px; border-radius: 50%; background: var(--color-surface-background); }
+.t3d-stub::before { top: -11px; } .t3d-stub::after { bottom: -11px; }
+.t3d-qr { background: #fff; padding: 8px; border-radius: 12px; line-height: 0; box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+.t3d-qr svg { width: 150px; height: 150px; display: block; }
+.t3d-stub small { font-size: 10px; color: var(--color-text-muted); text-align: center; letter-spacing: .04em; }
+.t3d-shine { position: absolute; inset: 0; pointer-events: none; z-index: 2; opacity: var(--shine); transition: opacity .25s; background: radial-gradient(circle at var(--mx) var(--my), rgba(255,255,255,.32), rgba(194,255,60,.1) 22%, transparent 48%); mix-blend-mode: overlay; }
+.t3d-holo { position: absolute; inset: 0; pointer-events: none; z-index: 2; opacity: calc(var(--shine) * .55); transition: opacity .25s; background: linear-gradient(115deg, transparent 20%, rgba(255,93,143,.22) 38%, rgba(194,255,60,.22) 50%, rgba(178,138,255,.22) 62%, transparent 80%); background-size: 220% 100%; background-position: var(--mx) 0; mix-blend-mode: color-dodge; }
+.t3d-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 18px; }
+@media (max-width: 620px) {
+  .t3d { grid-template-columns: 1fr; aspect-ratio: auto; }
+  .t3d-stub { border-left: 0; border-top: 2px dashed rgba(255,255,255,.16); }
+  .t3d-stub::before, .t3d-stub::after { top: -11px; left: auto; }
+  .t3d-stub::before { left: -11px; } .t3d-stub::after { right: -11px; bottom: auto; }
+  .t3d-bars { right: 0; bottom: 232px; }
+}
+@media (prefers-reduced-motion: reduce) { .t3d { animation: none; } }

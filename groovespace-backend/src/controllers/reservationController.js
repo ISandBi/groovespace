@@ -1,11 +1,13 @@
 const Reservation = require('../models/Reservation');
 const ReservationSlot = require('../models/ReservationSlot');
 const Band = require('../models/Band');
-const { rooms, rentalGear } = require('../config/catalog');
+const { rooms } = require('../config/catalog');
+const { buildQuote } = require('../lib/pricing');
+const { HOLD_MS } = require('../config/payment');
 
 exports.createReservation = async (req, res) => {
     try {
-        const { bandId, roomId: requestedRoomId, roomID, date, startTime, duration, attendees, rentedGear = [] } = req.body;
+        const { bandId, roomId: requestedRoomId, roomID, date, startTime, duration, attendees, rentedGear = [], extras: extraIds = [], payPlan = 'deposit' } = req.body;
         const resolvedRoomId = requestedRoomId || roomID;
 
         if (String(bandId) !== req.bandId) {
@@ -45,7 +47,7 @@ exports.createReservation = async (req, res) => {
         const band = await Band.findById(bandId).select('requiresEngineer engineerId');
         if (!band) return res.status(404).json({ error: 'No se encontró la banda de esta reserva.' });
 
-        const holdCutoff = new Date(Date.now() - 35 * 60 * 1000);
+        const holdCutoff = new Date(Date.now() - HOLD_MS);
         await Reservation.updateMany(
             { roomId: resolvedRoomId, date, isDemo: { $ne: true }, paymentStatus: 'deposit_pending', createdAt: { $lt: holdCutoff } },
             { $set: { paymentStatus: 'expired' } }
@@ -79,11 +81,15 @@ exports.createReservation = async (req, res) => {
             });
         }
 
-        if (!Array.isArray(rentedGear) || rentedGear.some((item) => !rentalGear.some((gear) => gear.id === item.id))) {
-            return res.status(400).json({ error: 'El equipo de renta solicitado no es válido.' });
+        if (!Array.isArray(rentedGear) || !Array.isArray(extraIds) || !['deposit', 'full'].includes(payPlan)) {
+            return res.status(400).json({ error: 'La selección de equipo, servicios o forma de pago no es válida.' });
         }
-        const selectedGear = [...new Map(rentedGear.map((item) => [item.id, rentalGear.find((gear) => gear.id === item.id)])).values()];
-        const normalizedTotal = (room.price + selectedGear.reduce((sum, item) => sum + item.price, 0)) * normalizedDuration;
+        // El precio SIEMPRE lo calcula el servidor con el catálogo; se ignora cualquier total enviado por el navegador.
+        const engineerId = req.body.engineerId === undefined ? (band.requiresEngineer ? band.engineerId : null) : (req.body.engineerId || null);
+        const quote = buildQuote({
+            roomId: resolvedRoomId, duration: normalizedDuration, attendees: normalizedAttendees,
+            gearIds: rentedGear.map((item) => item?.id), extraIds, engineerId
+        });
 
         const newReservation = new Reservation({
             bandId,
@@ -93,23 +99,26 @@ exports.createReservation = async (req, res) => {
             startTime,
             duration: normalizedDuration,
             attendees: normalizedAttendees,
-            rentedGear: selectedGear,
-            engineerId: band.requiresEngineer ? band.engineerId : null,
-            totalPrice: normalizedTotal,
-            depositAmount: Math.ceil(normalizedTotal / 2),
-            balanceAmount: normalizedTotal - Math.ceil(normalizedTotal / 2),
+            rentedGear: quote.gear,
+            extras: quote.extraIds,
+            quoteLines: quote.lines,
+            payPlan,
+            engineerId: quote.engineerId,
+            totalPrice: quote.total,
+            depositAmount: quote.deposit,
+            balanceAmount: quote.balance,
             balanceDueAt
         });
 
         await newReservation.save();
-        const expiresAt = new Date(Date.now() + 35 * 60 * 1000);
+        const expiresAt = new Date(Date.now() + HOLD_MS);
         const slots = [];
         for (let slotStart = requestedStartMinutes; slotStart < requestedEndMinutes; slotStart += 15) {
             slots.push({
                 roomId: resolvedRoomId,
                 date,
                 slotStart,
-                ...(band.requiresEngineer ? { engineerId: band.engineerId } : {}),
+                ...(quote.engineerId ? { engineerId: quote.engineerId } : {}),
                 reservationId: newReservation._id,
                 expiresAt
             });
@@ -125,8 +134,9 @@ exports.createReservation = async (req, res) => {
             }
             throw error;
         }
-        return res.status(201).json({ message: 'Reserva creada. El anticipo del 50% debe confirmarse para bloquear la sala.', reservation: newReservation });
+        return res.status(201).json({ message: 'Reserva creada. Tienes 12 horas para pagar el anticipo del 50% o el total; si no, la reserva se cancela y la sala se libera.', reservation: newReservation });
     } catch (error) {
+        if (error.name === 'QuoteError') return res.status(400).json({ error: error.message });
         return res.status(500).json({ error: 'Error interno en el servidor al consolidar la inmovilización de la sala.' });
     }
 };
@@ -175,6 +185,15 @@ exports.createDemoReservation = async (req, res) => {
     } catch {
         return res.status(500).json({ error: 'No se pudo preparar la sala de demostración.' });
     }
+};
+
+exports.expireStaleReservations = async () => {
+    const cutoff = new Date(Date.now() - HOLD_MS);
+    const stale = await Reservation.find({ isDemo: { $ne: true }, paymentStatus: 'deposit_pending', createdAt: { $lt: cutoff } });
+    for (const reservation of stale) {
+        await require('../modules/payments/service').expireReservation(reservation);
+    }
+    return stale.length;
 };
 
 exports.getAllReservations = async (req, res) => {
@@ -246,7 +265,7 @@ exports.getRoomsReservations = async (req, res) => {
         const { date } = req.query;
         if (date) {
             await Reservation.updateMany(
-                { roomId, date, isDemo: { $ne: true }, paymentStatus: 'deposit_pending', createdAt: { $lt: new Date(Date.now() - 35 * 60 * 1000) } },
+                { roomId, date, isDemo: { $ne: true }, paymentStatus: 'deposit_pending', createdAt: { $lt: new Date(Date.now() - HOLD_MS) } },
                 { $set: { paymentStatus: 'expired' } }
             );
         }

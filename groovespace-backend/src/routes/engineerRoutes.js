@@ -7,5 +7,6 @@ const router = express.Router();
 
 router.post('/login', rateLimit(15 * 60 * 1000, 5), engineerController.login);
 router.get('/me/schedule', requireEngineer, engineerController.getSchedule);
+router.get('/me/bands', requireEngineer, engineerController.getAssignedBands);
 
 module.exports = router;

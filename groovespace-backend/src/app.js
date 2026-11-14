@@ -72,8 +72,12 @@ app.use('/api/payments', require('./routes/paymentRoutes'));
 app.use('/api/staff', staffRoutes);
 app.use('/api/engineers', engineerRoutes);
 app.use('/api/qa', qaRoutes);
+require('./modules')(app);
 
 connectDB();
+
+// Cancela las reservas cuyo anticipo no se pagó dentro de las 12 horas y libera sus horarios.
+require('./modules/reminders/service').start();
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'active', message: 'Servidor de GrooveSpace operando correctamente' });

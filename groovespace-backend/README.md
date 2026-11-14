@@ -2,8 +2,8 @@
 
 ## Inicio local
 
-1. Copia `.env.example` a `.env`. Configura MongoDB, Stripe, el origen del frontend y secretos independientes para bandas, administración e ingeniería.
-2. Para desarrollo, usa claves de prueba de Stripe. Configura `STRIPE_WEBHOOK_SECRET` para los eventos `checkout.session.completed`, `checkout.session.expired`, `checkout.session.async_payment_succeeded` y `checkout.session.async_payment_failed` en `/api/payments/webhook`.
+1. Copia `.env.example` a `.env`. Configura MongoDB, PayPal, el origen del frontend y secretos independientes para bandas, administración e ingeniería.
+2. Para desarrollo, usa credenciales *sandbox* de PayPal (`PAYPAL_ENV=sandbox`). Crea un webhook en `/api/payments/webhook` para `CHECKOUT.ORDER.APPROVED` y `PAYMENT.CAPTURE.COMPLETED` y guarda su id en `PAYPAL_WEBHOOK_ID`.
 3. En `groovespace-frontend`, copia `.env.example` a `.env` y configura `VITE_API_URL` con la URL base del backend, por ejemplo `http://localhost:5000/api`.
 4. Inicia MongoDB y ejecuta `npm run dev` desde las carpetas `groovespace-backend` y `groovespace-frontend`.
 
@@ -100,7 +100,7 @@ Cada evento incluye `description` con la acción interpretada, método/ruta sane
 
 Los eventos no incluyen contraseñas, cuerpos de solicitud ni texto copiado; las IP e identificadores de actor se guardan como hashes HMAC, con retención TTL de 30 días en MongoDB. Las alertas por patrones son heurísticas: el navegador no puede detectar de forma fiable inspección de DevTools ni extracción de código fuente público. El flujo en tiempo real usa memoria del proceso y requiere una sola instancia del backend para distribuir eventos live; el historial sí se conserva en MongoDB. No es un SIEM certificado ni sustituye monitoreo de infraestructura.
 
-La eliminación de bandas es irreversible: también elimina reservas y el historial local asociado a pagos; no realiza reembolsos ni elimina registros dentro de Stripe. Antes de borrar, intenta expirar sesiones de Checkout abiertas y bloquea la acción si detecta un pago completado aún en proceso. En MongoDB replica set se usa una transacción; en una instancia standalone se usa borrado secuencial y, ante un fallo parcial, el endpoint informa que debe reintentarse. Configura políticas de retención y conciliación financiera antes de usarlo en producción.
+La eliminación de bandas es irreversible: también elimina reservas y el historial local asociado a pagos; no realiza reembolsos ni elimina registros dentro de PayPal. Antes de borrar, bloquea la acción si detecta una orden de PayPal aprobada pero aún sin capturar (las órdenes sin aprobar caducan solas). En MongoDB replica set se usa una transacción; en una instancia standalone se usa borrado secuencial y, ante un fallo parcial, el endpoint informa que debe reintentarse. Configura políticas de retención y conciliación financiera antes de usarlo en producción.
 
 ### Reservas y salas
 
@@ -114,13 +114,13 @@ La eliminación de bandas es irreversible: también elimina reservas y el histor
 | `GET` | `/reservations/:reservationId` | Banda propietaria | Consultar una reserva. |
 | `PATCH` | `/reservations/:reservationId/layout` | Banda propietaria | Guardar la distribución 3D de instrumentos tras confirmar el anticipo. |
 
-### Pagos Stripe
+### Pagos PayPal
 
 | Método | Ruta | Acceso | Uso |
 | --- | --- | --- | --- |
-| `POST` | `/payments/checkout` | Banda propietaria | Crear Stripe Checkout; cuerpo `{ "reservationId", "paymentType": "deposit" \| "balance" }`. |
-| `GET` | `/payments/verify/:reservationId/:sessionId` | Banda propietaria | Verificar la sesión Stripe al regresar del checkout. |
-| `POST` | `/payments/webhook` | Stripe; firma requerida | Procesar eventos de Stripe con el cuerpo HTTP sin modificar. |
+| `POST` | `/payments/checkout` | Banda propietaria | Crear orden de PayPal (Orders v2) y devolver el enlace de aprobación; cuerpo `{ "reservationId", "paymentType": "deposit" \| "balance" }`. |
+| `GET` | `/payments/verify/:reservationId/:sessionId` | Banda propietaria | Al volver de PayPal (`token` = id de orden): captura la orden aprobada y concilia importe, moneda y reserva. |
+| `POST` | `/payments/webhook` | PayPal; firma verificada con la API de PayPal | Procesar eventos de PayPal con el cuerpo HTTP sin modificar. |
 
 También está disponible `GET /api/health` para comprobar el estado del servicio. Las fotos cargadas se sirven bajo `/uploads`.
 
@@ -128,10 +128,10 @@ El catálogo incluye la **Sala E · Orquesta** (`sala_orquesta_e`), con capacida
 
 ## Pagos y seguridad
 
-El pago con tarjeta usa Stripe Checkout alojado: GrooveSpace no recibe ni almacena números de tarjeta ni códigos de seguridad. La API comprueba la propiedad de la reserva, importe, moneda, estado y firma del webhook antes de marcar un pago como confirmado. Una reserva pendiente de anticipo se mantiene hasta 35 minutos; el saldo debe liquidarse al menos 24 horas antes de la sesión.
+El pago real usa PayPal (aprobación alojada en paypal.com, MXN): GrooveSpace no recibe ni almacena números de tarjeta ni datos de la cuenta del pagador. En modo simulado se usa el formulario de tarjeta interno, que valida Luhn/vigencia/CVC y no guarda el PAN. La API comprueba la propiedad de la reserva, importe, moneda, estado y verificación del webhook antes de marcar un pago como confirmado. Una reserva pendiente de anticipo se mantiene hasta 35 minutos; el saldo debe liquidarse al menos 24 horas antes de la sesión.
 
-Se aplican controles de validación, autenticación por rol, límite de intentos en registro/login, límites de cuerpo, cabeceras HTTP y validación de webhook como medidas de defensa inspiradas en OWASP y PCI DSS. Esto no constituye una auditoría ni certificación de cumplimiento. Antes de producción, configura HTTPS, secretos fuertes y persistentes, credenciales individuales, Stripe en modo adecuado y pruebas de webhook en staging; no uses las credenciales predeterminadas locales en un despliegue.
+Se aplican controles de validación, autenticación por rol, límite de intentos en registro/login, límites de cuerpo, cabeceras HTTP y validación de webhook como medidas de defensa inspiradas en OWASP y PCI DSS. Esto no constituye una auditoría ni certificación de cumplimiento. Antes de producción, configura HTTPS, secretos fuertes y persistentes, credenciales individuales, PayPal en modo adecuado (`live`) y pruebas de webhook en staging; no uses las credenciales predeterminadas locales en un despliegue.
 
 La selección de dominio de correo es una validación de lista permitida almacenada en MongoDB, con opciones iniciales `gmail.com`, `hotmail.com` y `outlook.com`. Este control se alinea con prácticas de configuración segura (OWASP A05), pero OWASP A05 no es un estándar específico de direcciones de correo.
 
-Usa Stripe en modo prueba hasta validar en staging el pago correcto, cancelación, expiración, liquidación del saldo, recepción de webhooks y bloqueo/liberación de horarios. Una redirección exitosa del navegador por sí sola no confirma el pago.
+Usa PayPal sandbox hasta validar en staging el pago correcto, cancelación, expiración, liquidación del saldo, recepción de webhooks y bloqueo/liberación de horarios. Una redirección exitosa del navegador por sí sola no confirma el pago.
