@@ -84,7 +84,7 @@ const reservationSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ['paypal', 'simulated', 'wallet'],
+    enum: ['paypal', 'simulated', 'wallet', 'stripe'], // 'stripe' sólo por reservas antiguas ya guardadas
     default: 'paypal'
   },
   // Recibo de pago: sólo marca y últimos 4 dígitos (PCI DSS req. 3). Nunca el número completo ni el CVC.
