@@ -88,7 +88,7 @@ exports.createReservation = async (req, res) => {
         const engineerId = req.body.engineerId === undefined ? (band.requiresEngineer ? band.engineerId : null) : (req.body.engineerId || null);
         const quote = buildQuote({
             roomId: resolvedRoomId, duration: normalizedDuration, attendees: normalizedAttendees,
-            gearIds: rentedGear.map((item) => item?.id), extraIds, engineerId
+            gearIds: rentedGear.map((item) => (typeof item === 'string' ? item : item?.id)), extraIds, engineerId
         });
 
         const newReservation = new Reservation({
