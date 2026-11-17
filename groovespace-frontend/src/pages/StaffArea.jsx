@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FaLock } from 'react-icons/fa';
+import { IcLock } from '../ui/icons.jsx';
 import { api, formatDate, mxn } from '../lib/http';
 import { clearSession, readSession, saveSession, useSessions } from '../lib/session';
 import { Empty, ErrorNote, Field, Modal, Skeleton, Tabs, toast, useAsync } from '../ui/kit.jsx';
@@ -18,7 +18,7 @@ function Login() {
   };
   return (
     <div className="gs-page" style={{ maxWidth: 440 }}>
-      <form className="gs-card" onSubmit={submit}><FaLock color="var(--color-brand-primary)" size={24} /><h1 className="gs-h1" style={{ fontSize: 28, margin: '10px 0 16px' }}>Administración</h1>
+      <form className="gs-card" onSubmit={submit}><IcLock color="var(--color-brand-primary)" size={24} /><h1 className="gs-h1" style={{ fontSize: 28, margin: '10px 0 16px' }}>Administración</h1>
         <Field label="Usuario"><input value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} autoComplete="username" required /></Field>
         <Field label="Contraseña"><input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} autoComplete="current-password" required /></Field>
         <ErrorNote error={error} /><button className="gs-btn gs-btn--primary gs-btn--block" disabled={busy}>{busy ? 'Entrando…' : 'Entrar'}</button></form>

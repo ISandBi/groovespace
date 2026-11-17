@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { FaChevronLeft, FaCube, FaLock } from 'react-icons/fa';
+import { IcChevronLeft, IcCube, IcLock } from '../ui/icons.jsx';
 import { api, formatDate, mxn } from '../lib/http';
 import { Link, Redirect, navigate } from '../lib/router.jsx';
 import { computeQuote, loadCatalog, newDraft, readDraft, saveDraft } from '../lib/quote';
@@ -79,7 +79,7 @@ export default function Booking({ roomId }) {
 
   return (
     <div className="gs-page">
-      <button className="gs-btn gs-btn--sm" onClick={() => (step === 2 ? setStep(1) : navigate('/'))}><FaChevronLeft size={10} /> {step === 2 ? 'Ajustar sesión' : 'Salas'}</button>
+      <button className="gs-btn gs-btn--sm" onClick={() => (step === 2 ? setStep(1) : navigate('/'))}><IcChevronLeft size={10} /> {step === 2 ? 'Ajustar sesión' : 'Salas'}</button>
       <div className="gs-page-head" style={{ marginTop: 18 }}><div><p className="gs-eyebrow">Reserva</p><h1 className="gs-h1">{room.name}</h1></div></div>
       <div className="gs-steps"><span className="done">✓ Cuenta</span><span className={step === 1 ? 'on' : 'done'}>Sesión y fecha</span><span className={step === 2 ? 'on' : ''}>Pago</span></div>
 
@@ -105,7 +105,7 @@ export default function Booking({ roomId }) {
                 <label className={`gs-choice ${plan === 'deposit' ? 'on' : ''}`}><input type="radio" checked={plan === 'deposit'} onChange={() => setPlan('deposit')} /><div><b>Anticipo del 50% — {mxn(quote.deposit)}</b><small>El saldo de {mxn(quote.balance)} se liquida hasta 24 h antes de tu sesión.</small></div></label>
                 <label className={`gs-choice ${plan === 'full' ? 'on' : ''}`}><input type="radio" checked={plan === 'full'} onChange={() => setPlan('full')} /><div><b>Al contado — {mxn(quote.total)}</b><small>Pagas todo hoy y no vuelves a pensar en el saldo.</small></div></label>
               </div>
-              <p className="gs-hint" style={{ marginTop: 12 }}><FaLock size={11} /> Al reservar, la sala queda bloqueada 12 horas para tu banda; si no se paga, se libera sola. Recibirás un boleto con QR para el acceso.</p>
+              <p className="gs-hint" style={{ marginTop: 12 }}><IcLock size={11} /> Al reservar, la sala queda bloqueada 12 horas para tu banda; si no se paga, se libera sola. Recibirás un boleto con QR para el acceso.</p>
             </section>
             {needsTerms && (
               <section className="gs-card">
@@ -129,7 +129,7 @@ export default function Booking({ roomId }) {
               <button className="gs-btn gs-btn--block" style={{ marginTop: 10 }} disabled={busy || overlaps || (needsTerms && !typedName.trim())} onClick={() => submit('hold')}>Apartar y pagar después (12 h)</button>
             </>
           )}
-          {import.meta.env.DEV && room.customizable && <button className="gs-btn gs-btn--sm gs-btn--block" style={{ marginTop: 10 }} onClick={demoRoom} disabled={busy}><FaCube /> Probar sala 3D sin pago</button>}
+          {import.meta.env.DEV && room.customizable && <button className="gs-btn gs-btn--sm gs-btn--block" style={{ marginTop: 10 }} onClick={demoRoom} disabled={busy}><IcCube /> Probar sala 3D sin pago</button>}
           <Link to={`/cotizar/${room.id}`} className="gs-hint" style={{ display: 'block', marginTop: 10 }}>Ver cotizador</Link>
         </QuotePanel>
       </div>

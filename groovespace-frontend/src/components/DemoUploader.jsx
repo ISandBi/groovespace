@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FaCloudUploadAlt, FaFileAudio, FaVideo } from 'react-icons/fa';
+import { IcUpload, IcAudioFile, IcVideo } from '../ui/icons.jsx';
 import { api, formatBytes } from '../lib/http';
 import { ErrorNote, toast } from '../ui/kit.jsx';
 import { API_URL } from '../api';
@@ -41,10 +41,10 @@ export default function DemoUploader({ token, engineer, onUploaded }) {
 
   return (
     <form className="gs-card" onSubmit={submit}>
-      <h3 className="gs-h2" style={{ fontSize: 17 }}>{engineer.demoKinds.includes('video') && !engineer.demoKinds.includes('audio') ? <FaVideo /> : <FaFileAudio />} Demo para {engineer.name}</h3>
+      <h3 className="gs-h2" style={{ fontSize: 17 }}>{engineer.demoKinds.includes('video') && !engineer.demoKinds.includes('audio') ? <IcVideo /> : <IcAudioFile />} Demo para {engineer.name}</h3>
       <p className="gs-hint">{engineer.name} evalúa: {engineer.demoKinds.map((kind) => KIND_TEXT[kind]).join(' o ')}. Se guarda tal cual lo subes (sin recompresión) y el ingeniero lo escucha dentro de GrooveSpace, sin descargarlo, tras firmar un acuerdo de uso.</p>
       <label className="gs-drop" style={{ display: 'block', margin: '12px 0' }}>
-        <FaCloudUploadAlt size={22} /><br />{file ? `${file.name} · ${formatBytes(file.size)}` : 'Elegir archivo'}
+        <IcUpload size={22} /><br />{file ? `${file.name} · ${formatBytes(file.size)}` : 'Elegir archivo'}
         <input type="file" accept={accept} hidden onChange={(event) => setFile(event.target.files?.[0] || null)} />
       </label>
       <label className="gs-field"><span>Título</span><input required value={title} onChange={(event) => setTitle(event.target.value)} maxLength={120} /></label>

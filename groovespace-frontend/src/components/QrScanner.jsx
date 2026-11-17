@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { FaCamera, FaCheckCircle, FaQrcode, FaTimesCircle } from 'react-icons/fa';
+import { IcCamera, IcCheckCircle, IcQr, IcXCircle } from '../ui/icons.jsx';
 import { api, mxn } from '../lib/http';
 import { toast } from '../ui/kit.jsx';
 import './QrScanner.css';
@@ -123,11 +123,11 @@ export default function QrScanner({ token, onChange }) {
       <div>
         <div className={`qrs-view ${result?.verdict || ''}`}>
           <video ref={video} muted playsInline style={{ display: active ? 'block' : 'none' }} />
-          {!active && <div className="qrs-idle"><FaQrcode size={54} color="var(--color-brand-primary)" /><b style={{ color: 'var(--color-text-title)' }}>Escáner de boletos</b><span>Activa la cámara y apunta al QR del boleto, o escribe el código / usa un lector USB.</span></div>}
+          {!active && <div className="qrs-idle"><IcQr size={54} color="var(--color-brand-primary)" /><b style={{ color: 'var(--color-text-title)' }}>Escáner de boletos</b><span>Activa la cámara y apunta al QR del boleto, o escribe el código / usa un lector USB.</span></div>}
           <div className="qrs-frame"><i /><i /><i /><i />{active && <span className="qrs-line" />}</div>
         </div>
         <div className="gs-row" style={{ justifyContent: 'center', marginTop: 16 }}>
-          {supported && <button className="gs-btn gs-btn--primary" onClick={() => (active ? stop() : setActive(true))}><FaCamera /> {active ? 'Cerrar cámara' : starting ? 'Abriendo…' : 'Activar cámara'}</button>}
+          {supported && <button className="gs-btn gs-btn--primary" onClick={() => (active ? stop() : setActive(true))}><IcCamera /> {active ? 'Cerrar cámara' : starting ? 'Abriendo…' : 'Activar cámara'}</button>}
           {active && cameras.length > 1 && <select className="gs-input" style={{ maxWidth: 220 }} value={deviceId} onChange={(event) => setDeviceId(event.target.value)} aria-label="Cámara"><option value="">Cámara automática</option>{cameras.map((cam, index) => <option key={cam.deviceId} value={cam.deviceId}>{cam.label || `Cámara ${index + 1}`}</option>)}</select>}
         </div>
         <form className="gs-row" style={{ marginTop: 14, flexWrap: 'nowrap' }} onSubmit={(event) => { event.preventDefault(); lookup(manual); setManual(''); }}>
@@ -140,7 +140,7 @@ export default function QrScanner({ token, onChange }) {
       <div>
         {!result ? <div className="gs-empty">El resultado aparece aquí. Los boletos de bandas (GS-) y de eventos (GE-) se validan por igual.</div> : (
           <div className={`qrs-verdict ${result.verdict}`} role="status">
-            <div className="gs-row">{result.verdict === 'ok' ? <FaCheckCircle size={30} color="var(--color-booking-available)" /> : <FaTimesCircle size={30} color="var(--color-state-error)" />}<h3>{result.done ? 'Check-in hecho' : result.verdict === 'ok' ? 'Boleto válido' : 'No puede ingresar'}</h3></div>
+            <div className="gs-row">{result.verdict === 'ok' ? <IcCheckCircle size={30} color="var(--color-booking-available)" /> : <IcXCircle size={30} color="var(--color-state-error)" />}<h3>{result.done ? 'Check-in hecho' : result.verdict === 'ok' ? 'Boleto válido' : 'No puede ingresar'}</h3></div>
             <p style={{ color: 'var(--color-text-body)' }}>{result.message}</p>
             {ticket && (
               <div className="gs-list" style={{ margin: '12px 0' }}>

@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { FaCheckCircle, FaCreditCard } from 'react-icons/fa';
+import { IcCheckCircle, IcCard } from '../ui/icons.jsx';
 import { api, formatDateTime, mxn } from '../lib/http';
 import { bandActor, useSessions } from '../lib/session';
 import { Link } from '../lib/router.jsx';
@@ -49,7 +49,7 @@ export default function PaymentReturn() {
   return (
     <div className="gs-page" style={{ maxWidth: 860 }}>
       <div className="gs-card" style={{ textAlign: 'center' }}>
-        <FaCheckCircle size={30} color={state === 'cancelled' ? 'var(--color-booking-maintenance)' : 'var(--color-brand-primary)'} />
+        <IcCheckCircle size={30} color={state === 'cancelled' ? 'var(--color-booking-maintenance)' : 'var(--color-brand-primary)'} />
         <h1 className="gs-h1" style={{ fontSize: 30, margin: '10px 0' }}>{title}</h1>
         {isDemo && <p className="gs-hint">Reserva de demostración: no se procesó ningún cargo. Mueve los instrumentos y guarda la distribución.</p>}
         {state === 'cancelled' && <p className="gs-hint">{reservation?.paymentStatus === 'expired' ? 'El apartado expiró y la sala quedó disponible.' : 'No se realizó ningún cargo. Tu apartado sigue pendiente mientras dure la ventana de 12 horas.'}</p>}
@@ -59,7 +59,7 @@ export default function PaymentReturn() {
             <p className="gs-hint">{reservation.roomName} · {reservation.date} · {reservation.startTime}</p>
             <TicketCard reservation={reservation} bandName={band.name} />
             {!isDemo && reservation.paymentStatus === 'deposit_paid' && reservation.balanceDueAt && <p className="gs-hint" style={{ marginTop: 14 }}>Saldo pendiente {mxn(reservation.balanceAmount)} · liquídalo antes del {formatDateTime(reservation.balanceDueAt)}.</p>}
-            {!isDemo && pending && <button className="gs-btn gs-btn--primary" style={{ marginTop: 14 }} onClick={payNext} disabled={paying}><FaCreditCard /> {paying ? 'Conectando…' : reservation.paymentStatus === 'deposit_pending' ? `Pagar ${mxn(nextAmount)}` : `Pagar saldo ${mxn(nextAmount)}`}</button>}
+            {!isDemo && pending && <button className="gs-btn gs-btn--primary" style={{ marginTop: 14 }} onClick={payNext} disabled={paying}><IcCard /> {paying ? 'Conectando…' : reservation.paymentStatus === 'deposit_pending' ? `Pagar ${mxn(nextAmount)}` : `Pagar saldo ${mxn(nextAmount)}`}</button>}
             {reservation.paymentStatus === 'paid' && <p className="gs-ok" role="status">Pago liquidado por completo.</p>}
           </>
         )}

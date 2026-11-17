@@ -1,5 +1,10 @@
+/* GrooveSpace · tokens y base.
+   Paleta original conservada. Reglas del sistema (ver DESIGN.md):
+   bloques planos, líneas finas, sin sombras ni degradados, esquinas rectas, escala de 8 px. */
 :root {
   color-scheme: dark;
+
+  /* Paleta */
   --color-brand-primary: #c2ff3c;
   --color-brand-accent: #ff5d8f;
   --color-brand-dark: #100d17;
@@ -9,99 +14,86 @@
   --color-text-onDark: #fffaff;
   --color-surface-background: #100d17;
   --color-surface-card: #1d1725;
+  --color-surface-raised: #261e31;
   --color-surface-dark: #100d17;
   --color-action-primaryBg: #c2ff3c;
   --color-action-primaryHover: #d5ff75;
   --color-action-primaryActive: #a4dc1f;
   --color-border-default: #40354a;
+  --color-border-strong: #7a6b88;
   --color-border-focus: #c2ff3c;
   --color-booking-available: #c2ff3c;
   --color-booking-reserved: #b28aff;
   --color-booking-maintenance: #ffb84d;
   --color-state-error: #ff718b;
-  --page-gutter: clamp(20px, 5vw, 76px);
-  --surface-glass: rgba(31, 24, 40, 0.78);
-  --shadow-deep: 0 24px 70px rgba(0, 0, 0, 0.36);
+
+  /* Espaciado: múltiplos de 8 */
+  --s-1: 8px;
+  --s-2: 16px;
+  --s-3: 24px;
+  --s-4: 32px;
+  --s-5: 48px;
+  --s-6: 64px;
+  --s-7: 96px;
+  --s-8: 128px;
+  --page-gutter: clamp(16px, 5vw, 80px);
+
+  /* Tipografía */
+  --font-sans: Inter, "Source Sans 3", "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --fs-display: clamp(2.5rem, 6vw, 4.5rem);   /* H1 de portada: 40–72 px */
+  --fs-h1: clamp(2rem, 4vw, 3.25rem);          /* H1 de página: 32–52 px */
+  --fs-h2: clamp(1.75rem, 3vw, 2.5rem);        /* H2 de sección: 28–40 px */
+  --fs-h3: 1.25rem;                            /* H3: 20 px */
+  --fs-body: 1rem;                             /* cuerpo: 16 px / 1.5 */
+  --fs-small: .875rem;                         /* apoyo: 14 px */
+  --fs-label: .75rem;                          /* etiquetas: 12 px */
+
+  /* Forma: todo recto; los antiguos valores quedan neutralizados */
+  --radius: 0;
+  --line: rgba(255, 248, 255, .14);
+  --line-soft: rgba(255, 248, 255, .08);
+  --surface-glass: var(--color-surface-card);
+  --shadow-deep: none;
+  --nav-h: 72px;
+  --edge: calc(max(0px, (100vw - 1360px) / 2) + var(--page-gutter));
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-html {
-  scroll-behavior: smooth;
-  scroll-padding-top: 84px;
-}
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--nav-h) + 16px); }
 
 body {
   margin: 0;
   min-width: 320px;
-  background:
-    radial-gradient(ellipse at 14% 5%, rgba(136, 76, 255, 0.12), transparent 35rem),
-    var(--color-surface-background);
+  background: var(--color-surface-background);
   color: var(--color-text-body);
-  font-family: Inter, "Aptos", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: 1.5;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
-button,
-input,
-select,
-textarea {
-  font: inherit;
-}
+h1, h2, h3, h4 { margin: 0; color: var(--color-text-title); font-weight: 700; }
+p { margin: 0 0 var(--s-2); }
+img { max-width: 100%; }
+button, input, select, textarea { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+a { color: inherit; }
 
-button,
-a {
-  -webkit-tap-highlight-color: transparent;
-}
+/* Foco visible y consistente en todo el sitio */
+:focus-visible { outline: 2px solid var(--color-brand-primary); outline-offset: 2px; }
+.gs-skip { position: absolute; left: var(--s-2); top: -64px; z-index: 1000; padding: var(--s-1) var(--s-2); background: var(--color-brand-primary); color: #100d17; font-weight: 700; }
+.gs-skip:focus { top: var(--s-1); }
 
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-select:focus-visible {
-  outline: 2px solid var(--color-brand-primary);
-  outline-offset: 3px;
-}
-
-.tesla-header {
-  padding: 14px var(--page-gutter);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(16, 13, 23, 0.78);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(22px);
-  -webkit-backdrop-filter: blur(22px);
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-}
-
-.brand-title {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-text-onDark);
-}
-
-::selection {
-  color: #100d17;
-  background: var(--color-brand-primary);
-}
+::selection { color: #100d17; background: var(--color-brand-primary); }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     scroll-behavior: auto !important;
-    animation-duration: 0.01ms !important;
+    animation-duration: .01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transition-duration: .01ms !important;
   }
 }

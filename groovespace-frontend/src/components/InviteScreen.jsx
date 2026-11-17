@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FaUsers } from 'react-icons/fa';
+import { IcUsers } from '../ui/icons.jsx';
 import { api } from '../lib/http';
 import { navigate } from '../lib/router.jsx';
 import { saveSession } from '../lib/session';
@@ -25,7 +25,7 @@ export default function InviteScreen({ token }) {
   return (
     <div className="gs-page" style={{ maxWidth: 480 }}>
       <form className="gs-card" onSubmit={join}>
-        <FaUsers size={28} color="var(--color-brand-primary)" />
+        <IcUsers size={28} color="var(--color-brand-primary)" />
         <p className="gs-eyebrow" style={{ marginTop: 10 }}>Invitación</p>
         <h1 className="gs-h1" style={{ fontSize: 28, marginBottom: 14 }}>{invite.loading ? 'Verificando…' : invite.data?.bandName || 'Invitación GrooveSpace'}</h1>
         <ErrorNote error={invite.error} />

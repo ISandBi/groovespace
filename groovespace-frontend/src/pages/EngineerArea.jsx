@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FaHeadphones } from 'react-icons/fa';
+import { IcHeadphones } from '../ui/icons.jsx';
 import { API_URL, api, absoluteApi, assetUrl, formatBytes, formatDate, formatDateTime } from '../lib/http';
 import { clearSession, saveSession, useSessions } from '../lib/session';
 import { Empty, ErrorNote, Field, Modal, Skeleton, Tabs, toast, useAsync } from '../ui/kit.jsx';
@@ -18,7 +18,7 @@ function Login() {
   };
   return (
     <div className="gs-page" style={{ maxWidth: 440 }}>
-      <form className="gs-card" onSubmit={submit}><FaHeadphones size={24} color="var(--color-brand-primary)" /><h1 className="gs-h1" style={{ fontSize: 28, margin: '10px 0 16px' }}>Acceso de ingeniería</h1>
+      <form className="gs-card" onSubmit={submit}><IcHeadphones size={24} color="var(--color-brand-primary)" /><h1 className="gs-h1" style={{ fontSize: 28, margin: '10px 0 16px' }}>Acceso de ingeniería</h1>
         <Field label="Perfil"><select value={form.engineerId} onChange={(e) => setForm({ ...form, engineerId: e.target.value })} required><option value="">Selecciona…</option>{(engineers.data || []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></Field>
         <Field label="Usuario"><input value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} autoComplete="username" required /></Field>
         <Field label="Contraseña"><input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} autoComplete="current-password" required /></Field>

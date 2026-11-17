@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { FaCompress, FaExpand, FaSave } from 'react-icons/fa';
+import { IcMinimize, IcMaximize, IcSave } from '../ui/icons.jsx';
 import {
   ACESFilmicToneMapping,
   AmbientLight,
@@ -697,11 +697,11 @@ export default function RoomCustomizer({ reservation, instruments, accessToken }
             <input type="range" min="0" max="1" step="0.05" value={volume} aria-label="Volumen" onChange={(event) => setVolume(Number(event.target.value))} style={{ width: 80 }} />
           </label>
           <button type="button" style={overlayButton} onClick={() => setFullscreen((value) => !value)}>
-            {fullscreen ? <><FaCompress /> Salir</> : <><FaExpand /> Experiencia completa</>}
+            {fullscreen ? <><IcMinimize /> Salir</> : <><IcMaximize /> Experiencia completa</>}
           </button>
         </div>
         <button type="button" hidden style={{ ...overlayButton, pointerEvents: 'auto' }} onClick={() => setFullscreen((value) => !value)}>
-          {fullscreen ? <><FaCompress /> Salir</> : <><FaExpand /> Experiencia completa</>}
+          {fullscreen ? <><IcMinimize /> Salir</> : <><IcMaximize /> Experiencia completa</>}
         </button>
       </div>
       <div style={{ position: 'absolute', left: 12, right: 12, bottom: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', flexWrap: 'wrap', pointerEvents: 'none' }}>
@@ -709,7 +709,7 @@ export default function RoomCustomizer({ reservation, instruments, accessToken }
           {nowPlaying ? `♪ ${nowPlaying}` : mode === 'play' ? 'Toca cualquier parte del instrumento para escucharlo · Arrastra el fondo para girar' : `${saved ? 'Distribución guardada' : 'Cambios sin guardar'} · Arrastra un instrumento para moverlo`}
         </span>
         <button type="button" className="btn-grid-action" style={{ pointerEvents: 'auto' }} onClick={saveLayout} disabled={saving}>
-          <FaSave /> {saving ? 'Guardando...' : 'Guardar sala'}
+          <IcSave /> {saving ? 'Guardando...' : 'Guardar sala'}
         </button>
       </div>
       {fullscreen && error && <p role="alert" style={{ position: 'absolute', top: 60, left: 12, margin: 0, color: '#ffb4b4', background: 'rgba(15,18,22,.85)', padding: '8px 12px', borderRadius: '8px', fontSize: '13px' }}>{error}</p>}

@@ -1,5 +1,5 @@
 import { useMemo, useRef } from 'react';
-import { FaDownload, FaImage } from 'react-icons/fa';
+import { IcAudio, IcDownload, IcImage } from '../ui/icons.jsx';
 import { makeQr, qrToSvgPath } from '../qr';
 import { formatDate } from '../lib/http';
 import './Ticket3D.css';
@@ -81,7 +81,7 @@ export function Ticket3D({ code, title, subtitle, details, status, statusTone = 
         <article ref={card} className="t3d" aria-label={`Boleto de acceso ${code}`} onPointerMove={move} onPointerLeave={leave} onPointerCancel={leave}>
           <div className="t3d-bars" aria-hidden="true">{Array.from({ length: 26 }, (_, index) => <i key={index} style={{ height: `${30 + ((index * 37) % 70)}%`, animationDelay: `${(index % 9) * 0.13}s` }} />)}</div>
           <div className="t3d-main">
-            <div className="t3d-brand"><i>♪</i>GrooveSpace · Acceso</div>
+            <div className="t3d-brand"><i><IcAudio size={14} /></i>GrooveSpace · Acceso</div>
             <h2 className="t3d-title">{title}</h2>
             {subtitle && <p className="t3d-sub">{subtitle}</p>}
             <dl className="t3d-details">{details.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
@@ -91,12 +91,12 @@ export function Ticket3D({ code, title, subtitle, details, status, statusTone = 
             <div className="t3d-qr"><svg viewBox={`0 0 ${viewSize} ${viewSize}`} role="img" aria-label={`Código QR ${code}`} shapeRendering="crispEdges"><rect width={viewSize} height={viewSize} fill="#fff" /><path d={path} fill="#111" /></svg></div>
             <small>Muestra este código en recepción</small>
           </div>
-          <div className="t3d-holo" /><div className="t3d-shine" />
+          
         </article>
       </div>
       <div className="t3d-actions">
-        <button type="button" className="gs-btn gs-btn--sm" onClick={downloadPng}><FaImage /> Descargar PNG</button>
-        <button type="button" className="gs-btn gs-btn--sm" onClick={downloadSvg}><FaDownload /> Descargar SVG</button>
+        <button type="button" className="gs-btn gs-btn--sm" onClick={downloadPng}><IcImage /> Descargar PNG</button>
+        <button type="button" className="gs-btn gs-btn--sm" onClick={downloadSvg}><IcDownload /> Descargar SVG</button>
       </div>
     </div>
   );

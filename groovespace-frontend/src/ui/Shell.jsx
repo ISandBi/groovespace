@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { FaBars, FaBell, FaTimes } from 'react-icons/fa';
+import { IcAudio, IcMenu, IcBell, IcX, IcArrowRight } from './icons.jsx';
 import { Link, navigate, useLocation } from '../lib/router.jsx';
 import { bandActor, clearSession, useSessions } from '../lib/session';
 import { api, formatDateTime } from '../lib/http';
 import { Modal } from './kit.jsx';
+import { SITE } from '../lib/site.js';
 
 const LINKS = [['/', 'Salas'], ['/ingenieros', 'Ingenieros'], ['/bandas', 'Bandas'], ['/eventos', 'Eventos']];
 
@@ -18,7 +19,7 @@ function Bell({ token }) {
   };
   return (
     <>
-      <button className="gs-bell" onClick={toggle} aria-label={`Notificaciones${state.unread ? `, ${state.unread} nuevas` : ''}`}><FaBell size={15} />{state.unread > 0 && <b>{state.unread > 9 ? '9+' : state.unread}</b>}</button>
+      <button className="gs-bell" onClick={toggle} aria-label={`Notificaciones${state.unread ? `, ${state.unread} nuevas` : ''}`}><IcBell size={18} />{state.unread > 0 && <b>{state.unread > 9 ? '9+' : state.unread}</b>}</button>
       {open && (
         <Modal title="Notificaciones" onClose={() => setOpen(false)}>
           {state.items.length === 0 ? <p className="gs-hint">Todo al día. Aquí verás recordatorios, pagos y mensajes.</p> : (
@@ -46,24 +47,45 @@ export function Shell({ children }) {
     navigate('/');
   };
   const isActive = (to) => (to === '/' ? path === '/' : path.startsWith(to));
+  const signedIn = Boolean(band || sessions.engineer || sessions.staff);
   const portal = sessions.staff ? ['/administracion', 'Administración'] : sessions.engineer ? ['/ingenieria', 'Mi panel'] : ['/banda', band ? band.name : 'Mi banda'];
 
   return (
     <>
+      <a className="gs-skip" href="#contenido">Saltar al contenido</a>
       <nav className={`gs-nav ${open ? 'open' : ''}`} aria-label="Principal">
-        <Link to="/" className="gs-brand"><i>♪</i>GrooveSpace</Link>
-        <div className="gs-nav-links">{LINKS.map(([to, label]) => <Link key={to} to={to} className={isActive(to) ? 'active' : ''}>{label}</Link>)}</div>
+        <Link to="/" className="gs-brand"><i><IcAudio size={18} /></i>GrooveSpace</Link>
+        <div className="gs-nav-links">{LINKS.map(([to, label]) => <Link key={to} to={to} className={isActive(to) ? 'active' : ''} aria-current={isActive(to) ? 'page' : undefined}>{label}</Link>)}</div>
         <div className="gs-nav-side">
           {token && <Bell token={typeof token === 'string' ? token : token.token} />}
-          <Link to={portal[0]} className="gs-btn gs-btn--sm gs-btn--primary">{portal[1]}</Link>
-          {(band || sessions.engineer || sessions.staff) && <button className="gs-btn gs-btn--sm" onClick={logout}>Salir</button>}
+          {signedIn ? (
+            <>
+              <Link to={portal[0]} className="gs-btn gs-btn--sm gs-btn--primary">{portal[1]}</Link>
+              <button className="gs-btn gs-btn--sm" onClick={logout}>Cerrar sesión</button>
+            </>
+          ) : (
+            <>
+              <Link to="/ingreso" className="gs-btn gs-btn--sm gs-btn--text">Entrar</Link>
+              <Link to="/#catalogo" className="gs-btn gs-btn--sm gs-btn--primary">Reservar sala <IcArrowRight size={16} className="gs-arrow" /></Link>
+            </>
+          )}
         </div>
-        <button className="gs-burger" aria-label="Menú" onClick={() => setOpen(!open)}>{open ? <FaTimes /> : <FaBars />}</button>
+        <button className="gs-burger" aria-label={open ? 'Cerrar menú' : 'Abrir menú'} aria-expanded={open} onClick={() => setOpen(!open)}>{open ? <IcX size={22} /> : <IcMenu size={22} />}</button>
       </nav>
-      <div className="gs-app" key={path}>{children}</div>
+      <main id="contenido" className="gs-app" key={path}>{children}</main>
       <footer className="gs-footer">
-        <span>© GrooveSpace Studio · Ciudad de México</span>
-        <span><Link to="/ingenieria">Ingenieros</Link> · <Link to="/administracion">Administración</Link></span>
+        <div className="gs-wrap">
+          <div className="gs-footer-grid">
+            <div className="gs-footer-brand">
+              <Link to="/" className="gs-brand"><i><IcAudio size={18} /></i>GrooveSpace</Link>
+              <p>Salas de ensayo y grabación en {SITE.city}. Reserva por internet, paga con anticipo y entra con tu código QR.</p>
+            </div>
+            <div className="gs-footer-col"><h4>Plataforma</h4><Link to="/">Salas</Link><Link to="/ingenieros">Ingenieros</Link><Link to="/bandas">Bandas</Link><Link to="/eventos">Eventos</Link></div>
+            <div className="gs-footer-col"><h4>Contacto</h4><a href={`mailto:${SITE.email}`}>{SITE.email}</a><span>{SITE.phone}</span><span>{SITE.hours}</span></div>
+            <div className="gs-footer-col"><h4>Equipo</h4><Link to="/ingenieria">Acceso ingenieros</Link><Link to="/administracion">Administración</Link></div>
+          </div>
+          <div className="gs-footer-base"><span>© {new Date().getFullYear()} GrooveSpace Studio · {SITE.city}</span><span>Pagos protegidos conforme a PCI DSS y NIST CSF</span></div>
+        </div>
       </footer>
     </>
   );

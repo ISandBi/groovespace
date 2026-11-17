@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FaCube, FaTicketAlt, FaWallet } from 'react-icons/fa';
+import { IcCube, IcTicket, IcWallet } from '../../ui/icons.jsx';
 import { api, formatDate, mxn } from '../../lib/http';
 import { Empty, ErrorNote, Modal, Skeleton, toast, useAsync } from '../../ui/kit.jsx';
 import TicketCard from '../../components/TicketCard.jsx';
@@ -51,9 +51,9 @@ function SessionCard({ reservation, actor, reload }) {
       </div>
       <div className="gs-row">
         {manager && payable && <button className="gs-btn gs-btn--sm gs-btn--primary" disabled={busy} onClick={checkout}>Pagar {mxn(amount)}</button>}
-        {manager && payable && <button className="gs-btn gs-btn--sm" disabled={busy} onClick={wallet}><FaWallet /> Con cartera</button>}
-        {reservation.ticketCode && <button className="gs-btn gs-btn--sm" onClick={() => setModal('ticket')}><FaTicketAlt /> Boleto</button>}
-        {['sala_estudio_a', 'sala_orquesta_e'].includes(reservation.roomId) && reservation.ticketCode && actor.role === 'lider' && <a className="gs-btn gs-btn--sm" href={`/?payment=view&reservation_id=${reservation.id}`}><FaCube /> Sala 3D</a>}
+        {manager && payable && <button className="gs-btn gs-btn--sm" disabled={busy} onClick={wallet}><IcWallet /> Con cartera</button>}
+        {reservation.ticketCode && <button className="gs-btn gs-btn--sm" onClick={() => setModal('ticket')}><IcTicket /> Boleto</button>}
+        {['sala_estudio_a', 'sala_orquesta_e'].includes(reservation.roomId) && reservation.ticketCode && actor.role === 'lider' && <a className="gs-btn gs-btn--sm" href={`/?payment=view&reservation_id=${reservation.id}`}><IcCube /> Sala 3D</a>}
         {payable && <button className="gs-btn gs-btn--sm" onClick={() => setModal('split')}>Dividir pago</button>}
         <button className="gs-btn gs-btn--sm" onClick={() => setModal('chat')}>Chat</button>
       </div>

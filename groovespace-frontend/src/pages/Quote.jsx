@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { FaChevronLeft } from 'react-icons/fa';
+import { IcChevronLeft } from '../ui/icons.jsx';
 import { bandActor, useSessions } from '../lib/session';
 import { Link, navigate } from '../lib/router.jsx';
 import { computeQuote, loadCatalog, newDraft, readDraft, saveDraft } from '../lib/quote';
@@ -21,7 +21,7 @@ export default function Quote({ roomId }) {
   const proceed = () => navigate(bandActor(sessions) ? `/reservar/${room.id}` : `/registro?next=${encodeURIComponent(`/reservar/${room.id}`)}`);
   return (
     <div className="gs-page">
-      <Link to="/" className="gs-btn gs-btn--sm"><FaChevronLeft size={10} /> Salas</Link>
+      <Link to="/" className="gs-btn gs-btn--sm"><IcChevronLeft size={10} /> Salas</Link>
       <div className="gs-page-head" style={{ marginTop: 18 }}>
         <div><p className="gs-eyebrow">Cotizador · sin necesidad de cuenta</p><h1 className="gs-h1">{room.name}</h1><p className="gs-hint" style={{ marginTop: 8 }}>{room.blurb}</p></div>
       </div>
