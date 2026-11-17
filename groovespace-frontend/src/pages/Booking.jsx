@@ -79,15 +79,15 @@ export default function Booking({ roomId }) {
 
   return (
     <div className="gs-page">
-      <button className="gs-btn gs-btn--sm" onClick={() => (step === 2 ? setStep(1) : navigate('/'))}><IcChevronLeft size={10} /> {step === 2 ? 'Ajustar sesión' : 'Salas'}</button>
-      <div className="gs-page-head" style={{ marginTop: 18 }}><div><p className="gs-eyebrow">Reserva</p><h1 className="gs-h1">{room.name}</h1></div></div>
-      <div className="gs-steps"><span className="done">✓ Cuenta</span><span className={step === 1 ? 'on' : 'done'}>Sesión y fecha</span><span className={step === 2 ? 'on' : ''}>Pago</span></div>
+      <button className="gs-crumb" onClick={() => (step === 2 ? setStep(1) : navigate('/'))}><IcChevronLeft size={16} /> {step === 2 ? 'Volver a fecha y sesión' : 'Volver a las salas'}</button>
+      <div className="gs-page-head"><div><p className="gs-eyebrow">Reserva</p><h1 className="gs-h1">{room.name}</h1></div></div>
+      <div className="gs-steps"><span className="done">01 Cuenta lista</span><span className={step === 1 ? 'on' : 'done'}>02 Sesión y fecha</span><span className={step === 2 ? 'on' : ''}>03 Pago</span></div>
 
       <div className="gs-split">
         {step === 1 ? (
           <div style={{ display: 'grid', gap: 18 }}>
             <section className="gs-card">
-              <h2 className="gs-h2">Fecha y hora</h2>
+              <h2 className="gs-h2">Fecha y hora de entrada</h2>
               <div className="gs-grid gs-grid--2" style={{ gap: 14 }}>
                 <label className="gs-field"><span>Día</span><input type="date" min={isoAfter(1)} value={draft.date} onChange={setField('date')} required /></label>
                 <label className="gs-field"><span>Hora de entrada</span><input type="time" step="900" value={draft.startTime} onChange={setField('startTime')} required /></label>
@@ -100,12 +100,12 @@ export default function Booking({ roomId }) {
         ) : (
           <div style={{ display: 'grid', gap: 18 }}>
             <section className="gs-card">
-              <h2 className="gs-h2">¿Cómo quieres pagar?</h2>
+              <h2 className="gs-h2">¿Cuánto pagas hoy?</h2>
               <div style={{ display: 'grid', gap: 10 }}>
                 <label className={`gs-choice ${plan === 'deposit' ? 'on' : ''}`}><input type="radio" checked={plan === 'deposit'} onChange={() => setPlan('deposit')} /><div><b>Anticipo del 50% — {mxn(quote.deposit)}</b><small>El saldo de {mxn(quote.balance)} se liquida hasta 24 h antes de tu sesión.</small></div></label>
-                <label className={`gs-choice ${plan === 'full' ? 'on' : ''}`}><input type="radio" checked={plan === 'full'} onChange={() => setPlan('full')} /><div><b>Al contado — {mxn(quote.total)}</b><small>Pagas todo hoy y no vuelves a pensar en el saldo.</small></div></label>
+                <label className={`gs-choice ${plan === 'full' ? 'on' : ''}`}><input type="radio" checked={plan === 'full'} onChange={() => setPlan('full')} /><div><b>Al contado — {mxn(quote.total)}</b><small>Liquidas la sesión completa y no queda saldo pendiente.</small></div></label>
               </div>
-              <p className="gs-hint" style={{ marginTop: 12 }}><IcLock size={11} /> Al reservar, la sala queda bloqueada 12 horas para tu banda; si no se paga, se libera sola. Recibirás un boleto con QR para el acceso.</p>
+              <p className="gs-hint" style={{ marginTop: 12 }}><IcLock size={14} style={{ verticalAlign: '-2px' }} /> Al reservar, la sala queda bloqueada 12 horas para tu banda; si no se paga, se libera sola. Recibirás un boleto con QR para el acceso.</p>
             </section>
             {needsTerms && (
               <section className="gs-card">
@@ -126,11 +126,11 @@ export default function Booking({ roomId }) {
           ) : (
             <>
               <button className="gs-btn gs-btn--primary gs-btn--block" style={{ marginTop: 12 }} disabled={busy || overlaps || (needsTerms && !typedName.trim())} onClick={() => submit('pay')}>{busy ? 'Procesando…' : plan === 'full' ? `Pagar ${mxn(quote.total)}` : `Pagar anticipo ${mxn(quote.deposit)}`}</button>
-              <button className="gs-btn gs-btn--block" style={{ marginTop: 10 }} disabled={busy || overlaps || (needsTerms && !typedName.trim())} onClick={() => submit('hold')}>Apartar y pagar después (12 h)</button>
+              <button className="gs-btn gs-btn--block" style={{ marginTop: 10 }} disabled={busy || overlaps || (needsTerms && !typedName.trim())} onClick={() => submit('hold')}>Apartar sin pagar (12 h)</button>
             </>
           )}
-          {import.meta.env.DEV && room.customizable && <button className="gs-btn gs-btn--sm gs-btn--block" style={{ marginTop: 10 }} onClick={demoRoom} disabled={busy}><IcCube /> Probar sala 3D sin pago</button>}
-          <Link to={`/cotizar/${room.id}`} className="gs-hint" style={{ display: 'block', marginTop: 10 }}>Ver cotizador</Link>
+          {import.meta.env.DEV && room.customizable && <button className="gs-btn gs-btn--sm gs-btn--block" style={{ marginTop: 10 }} onClick={demoRoom} disabled={busy}><IcCube size={16} /> Probar sala 3D sin pago</button>}
+          <Link to={`/cotizar/${room.id}`} className="gs-hint" style={{ display: 'block', marginTop: 10 }}>Cambiar en el cotizador</Link>
         </QuotePanel>
       </div>
     </div>

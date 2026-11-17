@@ -21,16 +21,17 @@ export default function Quote({ roomId }) {
   const proceed = () => navigate(bandActor(sessions) ? `/reservar/${room.id}` : `/registro?next=${encodeURIComponent(`/reservar/${room.id}`)}`);
   return (
     <div className="gs-page">
-      <Link to="/" className="gs-btn gs-btn--sm"><IcChevronLeft size={10} /> Salas</Link>
-      <div className="gs-page-head" style={{ marginTop: 18 }}>
-        <div><p className="gs-eyebrow">Cotizador · sin necesidad de cuenta</p><h1 className="gs-h1">{room.name}</h1><p className="gs-hint" style={{ marginTop: 8 }}>{room.blurb}</p></div>
+      <Link to="/#catalogo" className="gs-crumb"><IcChevronLeft size={16} /> Volver a las salas</Link>
+      <div className="gs-page-head">
+        <div><p className="gs-eyebrow">Cotizador · sin crear cuenta</p><h1 className="gs-h1">{room.name}</h1><p className="gs-lead" style={{ marginTop: 16, marginBottom: 0 }}>{room.blurb}</p></div>
+        <img src={room.imagePath} alt="" className="gs-photo" style={{ width: 'min(320px, 100%)', aspectRatio: '16 / 10', objectFit: 'cover' }} />
       </div>
-      <div className="gs-steps"><span className="on">1 · Arma tu sesión</span><span>2 · Regístrate</span><span>3 · Elige fecha y paga</span></div>
+      <div className="gs-steps"><span className="on">01 Arma tu sesión</span><span>02 Registra a tu banda</span><span>03 Elige fecha y paga</span></div>
       <div className="gs-split">
         <QuoteBuilder catalog={catalog.data} room={room} draft={draft} setDraft={setDraft} />
         <QuotePanel quote={quote} room={room}>
-          <button className="gs-btn gs-btn--primary gs-btn--block" style={{ marginTop: 14 }} onClick={proceed}>{bandActor(sessions) ? 'Continuar a fecha y pago' : 'Me convence: registrar mi banda'}</button>
-          <p className="gs-hint" style={{ marginTop: 8 }}>Tu selección se conserva al registrarte.</p>
+          <button className="gs-btn gs-btn--primary gs-btn--block" style={{ marginTop: 14 }} onClick={proceed}>{bandActor(sessions) ? 'Continuar a fecha y pago' : 'Registrar mi banda y elegir fecha'}</button>
+          <p className="gs-hint" style={{ marginTop: 8 }}>Tu selección se conserva al registrarte. No se cobra nada hasta el paso de pago.</p>
         </QuotePanel>
       </div>
     </div>

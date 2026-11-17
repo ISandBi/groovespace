@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { IcLock, IcShield, IcCard } from '../ui/icons.jsx';
+import { IcCheck, IcLock, IcShield, IcCard } from '../ui/icons.jsx';
 import { api, mxn } from '../lib/http';
 import { bandActor, useSessions } from '../lib/session';
 import { Link } from '../lib/router.jsx';
@@ -68,13 +68,13 @@ export default function SimulatedCheckout() {
   if (done) {
     const result = done.result;
     return (
-      <div className="gs-page" style={{ maxWidth: 760, textAlign: 'center' }}>
-        <p className="gs-eyebrow">Pago confirmado</p>
-        <h1 className="gs-h1">¡Listo!</h1>
-        <p className="gs-hint">Pagado con {done.receipt.brand} terminación {done.receipt.last4}. No guardamos tu número de tarjeta.</p>
+      <div className="gs-page" style={{ maxWidth: 840 }}>
+        <p className="gs-eyebrow"><IcCheck size={14} style={{ verticalAlign: '-2px' }} /> Pago confirmado</p>
+        <h1 className="gs-h1">Pago recibido</h1>
+        <p className="gs-lead" style={{ marginBottom: 'var(--s-3)' }}>Pagado con {done.receipt.brand} terminación {done.receipt.last4}. No guardamos tu número de tarjeta.</p>
         {done.purpose === 'event_ticket' && result?.code && <Ticket3D code={result.code} title={result.eventTitle} subtitle={result.venue} details={[['Fecha', formatDate(result.date)], ['Hora', result.startTime], ['Boletos', String(result.quantity)], ['A nombre de', result.buyerName]]} status="Boleto vigente" />}
-        {done.purpose === 'wallet_topup' && <p style={{ fontSize: 22, color: 'var(--color-brand-primary)' }}>Nuevo saldo: {mxn(result?.balance)}</p>}
-        <Link to={done.returnPath || '/'} className="gs-btn gs-btn--primary" style={{ marginTop: 20 }}>Continuar</Link>
+        {done.purpose === 'wallet_topup' && <p className="gs-h2">Nuevo saldo: {mxn(result?.balance)}</p>}
+        <Link to={done.returnPath || '/'} className="gs-btn gs-btn--primary" style={{ marginTop: 'var(--s-3)' }}>Continuar</Link>
       </div>
     );
   }
@@ -85,9 +85,9 @@ export default function SimulatedCheckout() {
 
   return (
     <div className="gs-page">
-      <p className="gs-eyebrow">Pago seguro</p>
-      <h1 className="gs-h1">Confirma tu pago</h1>
-      <div className="gs-split" style={{ marginTop: 22 }}>
+      <div className="gs-page-head"><div><p className="gs-eyebrow">Pago seguro</p>
+      <h1 className="gs-h1">Confirma tu pago</h1></div></div>
+      <div className="gs-split">
         <form className="gs-card" onSubmit={pay} autoComplete="off">
           {simulated && <p className="gs-badge gs-badge--warn" style={{ marginBottom: 14 }}>Modo de pruebas · no se realiza ningún cargo real</p>}
           <div className="gs-field"><span>Método de pago</span>
@@ -107,18 +107,18 @@ export default function SimulatedCheckout() {
             <div><b>He leído el aviso de protección de datos de pago</b><small>PCI DSS v4.0 y NIST. <button type="button" className="gs-btn gs-btn--sm" style={{ minHeight: 24, padding: '0 10px' }} onClick={() => setShowNotice(true)}>Leer aviso</button></small></div>
           </label>
           <ErrorNote error={error} />
-          <button className="gs-btn gs-btn--primary gs-btn--block" disabled={!valid || busy}><IcLock size={12} /> {busy ? 'Procesando…' : `Pagar ${mxn(info.amount)}`}</button>
+          <button className="gs-btn gs-btn--primary gs-btn--block" disabled={!valid || busy}><IcLock size={16} /> {busy ? 'Procesando…' : `Pagar ${mxn(info.amount)}`}</button>
           <p className="gs-hint" style={{ marginTop: 12 }}>Tarjetas de prueba: 4242 4242 4242 4242 (aprobada) · 4000 0000 0000 0002 (rechazada). Cualquier fecha futura y CVC.</p>
         </form>
 
         <aside className="gs-card gs-sticky">
           <p className="gs-eyebrow">Resumen</p>
-          <h3 style={{ margin: '6px 0', color: 'var(--color-text-title)' }}>{info.label}</h3>
+          <h3 className="gs-h3" style={{ margin: '8px 0 var(--s-2)' }}>{info.label}</h3>
           <div className="gs-quote-total"><span className="gs-hint">Total a pagar</span><strong>{mxn(info.amount)}</strong></div>
-          <div className="gs-list" style={{ marginTop: 16, fontSize: 12, color: 'var(--color-text-muted)' }}>
-            <span><IcShield /> No guardamos tu número de tarjeta ni el CVC.</span>
-            <span><IcLock /> Conexión cifrada y aviso versionado con huella digital.</span>
-            <span><IcCard /> Aceptamos {methods.map((item) => item.label).join(', ')}.</span>
+          <div className="gs-list" style={{ marginTop: 'var(--s-3)', fontSize: 14, color: 'var(--color-text-muted)', gap: 12 }}>
+            <span><IcShield size={16} style={{ verticalAlign: '-3px', marginRight: 8 }} /> No guardamos tu número de tarjeta ni el CVC.</span>
+            <span><IcLock size={16} style={{ verticalAlign: '-3px', marginRight: 8 }} /> Conexión cifrada y aviso versionado con huella digital.</span>
+            <span><IcCard size={16} style={{ verticalAlign: '-3px', marginRight: 8 }} /> Aceptamos {methods.map((item) => item.label).join(', ')}.</span>
           </div>
           <Link to={info.returnPath || '/'} className="gs-btn gs-btn--sm gs-btn--block" style={{ marginTop: 16 }}>Cancelar y volver</Link>
         </aside>

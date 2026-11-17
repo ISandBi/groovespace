@@ -3,12 +3,12 @@ import { IcStar } from '../ui/icons.jsx';
 import { api, assetUrl, formatDate, mxn, API_URL } from '../lib/http';
 import { Link, navigate } from '../lib/router.jsx';
 import { bandActor, useSessions } from '../lib/session';
-import { Empty, ErrorNote, Field, Modal, Reveal, Skeleton, toast, useAsync } from '../ui/kit.jsx';
+import { Empty, ErrorNote, Field, Modal, Placeholder, Reveal, Skeleton, toast, useAsync } from '../ui/kit.jsx';
 import SecurePlayer from '../components/SecurePlayer.jsx';
 import { Ticket3D } from '../components/TicketCard.jsx';
 import { loadCatalog } from '../lib/quote';
 
-const Logo = ({ band, size = 56 }) => <img src={assetUrl(band.logoPath)} alt="" width={size} height={size} style={{ borderRadius: 14, objectFit: 'cover', background: '#2a2133' }} />;
+const Logo = ({ band, size = 56 }) => <img src={assetUrl(band.logoPath)} alt="" width={size} height={size} style={{ objectFit: 'cover', background: '#2a2133' }} />;
 
 // ---------- Directorio de bandas y perfil público (EPK) ----------
 export function Directory() {
@@ -16,7 +16,7 @@ export function Directory() {
   const list = useAsync(() => api(`/epk?${new URLSearchParams(Object.entries(filters).filter(([, value]) => value))}`), [filters.q, filters.genre, filters.district]);
   return (
     <div className="gs-page">
-      <div className="gs-page-head"><div><p className="gs-eyebrow">Comunidad</p><h1 className="gs-h1">Bandas en GrooveSpace</h1></div></div>
+      <div className="gs-page-head"><div><p className="gs-eyebrow">Comunidad</p><h1 className="gs-h1">Bandas que ya ensayan aquí</h1></div></div>
       <div className="gs-grid gs-grid--2" style={{ marginBottom: 20 }}>
         {[['q', 'Buscar por nombre'], ['genre', 'Género'], ['district', 'Alcaldía o colonia']].map(([key, label]) => <label className="gs-field" key={key}><span>{label}</span><input value={filters[key]} onChange={(event) => setFilters({ ...filters, [key]: event.target.value })} /></label>)}
       </div>
@@ -111,7 +111,7 @@ export function Events() {
           return (
             <Reveal key={event.id} delay={index * 50} className="gs-card gs-card--hover">
               <div className="gs-row" style={{ justifyContent: 'space-between' }}><span className="gs-badge gs-badge--ok">{formatDate(event.date)} · {event.startTime}</span><span className="gs-badge">{event.venue}</span></div>
-              <h3 style={{ margin: '14px 0 6px', fontSize: 20, color: 'var(--color-text-title)' }}>{event.title}</h3>
+              <h3 className="gs-h3" style={{ margin: 'var(--s-2) 0 8px', fontSize: 24 }}>{event.title}</h3>
               <p className="gs-hint">{event.description}</p>
               {event.requirements && <p className="gs-hint"><b>Requisitos:</b> {event.requirements}</p>}
               <div className="gs-row" style={{ marginTop: 14 }}>
@@ -172,7 +172,7 @@ export function Engineers() {
   const set = (key) => (event) => setFilters({ ...filters, [key]: event.target.value });
   return (
     <div className="gs-page">
-      <div className="gs-page-head"><div><p className="gs-eyebrow">Marketplace</p><h1 className="gs-h1">Ingenieros de audio</h1></div></div>
+      <div className="gs-page-head"><div><p className="gs-eyebrow">Marketplace</p><h1 className="gs-h1">Ingenieros de audio</h1><p className="gs-lead" style={{ marginTop: 16, marginBottom: 0 }}>Escucha su portafolio, compara tarifas y envía tu demo antes de reservar.</p></div></div>
       <div className="gs-grid" style={{ marginBottom: 22, gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))' }}>
         <Field label="Género"><input value={filters.genre} onChange={set('genre')} placeholder="Rock, Jazz…" /></Field>
         <Field label="Tarifa máx./h"><input type="number" min="0" value={filters.maxRate} onChange={set('maxRate')} /></Field>
@@ -183,12 +183,13 @@ export function Engineers() {
       {list.loading ? <Skeleton rows={3} /> : list.error ? <ErrorNote error={list.error} /> : list.data.length === 0 ? <Empty>Ningún ingeniero coincide con esos filtros.</Empty> : (
         <div className="gs-grid">{list.data.map((engineer, index) => (
           <Reveal key={engineer.id} delay={index * 50} className="gs-card gs-card--hover">
+            <Placeholder ratio="16 / 9" label="Retrato del ingeniero" style={{ marginBottom: 'var(--s-2)' }} />
             <div className="gs-row" style={{ justifyContent: 'space-between' }}><b style={{ fontSize: 18, color: 'var(--color-text-title)' }}>{engineer.name}</b><Stars value={engineer.rating} /></div>
             <p className="gs-hint">{engineer.specialty}</p>
             <div className="gs-row">{engineer.genres.map((genre) => <span className="gs-badge" key={genre}>{genre}</span>)}</div>
             <div className="gs-row" style={{ margin: '12px 0' }}><span className="gs-price">{mxn(engineer.hourlyRate)}<small>/h</small></span><span className="gs-badge gs-badge--violet">Demo: {engineer.demoKinds.map((kind) => (kind === 'video' ? 'video en vivo' : 'audio')).join(' / ')}</span></div>
             {engineer.busy && <p className="gs-hint">{engineer.busy.length ? `Ocupado: ${engineer.busy.map((slot) => `${slot.startTime} (${slot.duration} h)`).join(', ')}` : 'Libre ese día'}</p>}
-            <button className="gs-btn gs-btn--sm" onClick={() => setOpen(engineer)}>Ver perfil · {engineer.samples.length} muestras · {engineer.reviews} reseñas</button>
+            <button className="gs-btn gs-btn--sm" onClick={() => setOpen(engineer)}>Ver perfil y portafolio</button>
           </Reveal>))}</div>)}
       {open && <EngineerDetail engineer={open} actor={actor} onClose={() => setOpen(null)} />}
     </div>
