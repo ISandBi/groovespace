@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { FaLock, FaShieldAlt, FaCreditCard } from 'react-icons/fa';
+import { IcLock, IcShield, IcCard } from '../ui/icons.jsx';
 import { api, mxn } from '../lib/http';
 import { bandActor, useSessions } from '../lib/session';
 import { Link } from '../lib/router.jsx';
@@ -107,7 +107,7 @@ export default function SimulatedCheckout() {
             <div><b>He leído el aviso de protección de datos de pago</b><small>PCI DSS v4.0 y NIST. <button type="button" className="gs-btn gs-btn--sm" style={{ minHeight: 24, padding: '0 10px' }} onClick={() => setShowNotice(true)}>Leer aviso</button></small></div>
           </label>
           <ErrorNote error={error} />
-          <button className="gs-btn gs-btn--primary gs-btn--block" disabled={!valid || busy}><FaLock size={12} /> {busy ? 'Procesando…' : `Pagar ${mxn(info.amount)}`}</button>
+          <button className="gs-btn gs-btn--primary gs-btn--block" disabled={!valid || busy}><IcLock size={12} /> {busy ? 'Procesando…' : `Pagar ${mxn(info.amount)}`}</button>
           <p className="gs-hint" style={{ marginTop: 12 }}>Tarjetas de prueba: 4242 4242 4242 4242 (aprobada) · 4000 0000 0000 0002 (rechazada). Cualquier fecha futura y CVC.</p>
         </form>
 
@@ -116,9 +116,9 @@ export default function SimulatedCheckout() {
           <h3 style={{ margin: '6px 0', color: 'var(--color-text-title)' }}>{info.label}</h3>
           <div className="gs-quote-total"><span className="gs-hint">Total a pagar</span><strong>{mxn(info.amount)}</strong></div>
           <div className="gs-list" style={{ marginTop: 16, fontSize: 12, color: 'var(--color-text-muted)' }}>
-            <span><FaShieldAlt /> No guardamos tu número de tarjeta ni el CVC.</span>
-            <span><FaLock /> Conexión cifrada y aviso versionado con huella digital.</span>
-            <span><FaCreditCard /> Aceptamos {methods.map((item) => item.label).join(', ')}.</span>
+            <span><IcShield /> No guardamos tu número de tarjeta ni el CVC.</span>
+            <span><IcLock /> Conexión cifrada y aviso versionado con huella digital.</span>
+            <span><IcCard /> Aceptamos {methods.map((item) => item.label).join(', ')}.</span>
           </div>
           <Link to={info.returnPath || '/'} className="gs-btn gs-btn--sm gs-btn--block" style={{ marginTop: 16 }}>Cancelar y volver</Link>
         </aside>

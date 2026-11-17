@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FaStar } from 'react-icons/fa';
+import { IcStar } from '../ui/icons.jsx';
 import { api, assetUrl, formatDate, mxn, API_URL } from '../lib/http';
 import { Link, navigate } from '../lib/router.jsx';
 import { bandActor, useSessions } from '../lib/session';
@@ -129,7 +129,7 @@ export function Events() {
 }
 
 // ---------- Marketplace de ingenieros ----------
-const Stars = ({ value }) => <span style={{ color: 'var(--color-booking-maintenance)', whiteSpace: 'nowrap' }}>{value ? <><FaStar /> {value.toFixed(1)}</> : 'Sin reseñas'}</span>;
+const Stars = ({ value }) => <span style={{ color: 'var(--color-booking-maintenance)', whiteSpace: 'nowrap' }}>{value ? <><IcStar /> {value.toFixed(1)}</> : 'Sin reseñas'}</span>;
 
 function EngineerDetail({ engineer, actor, onClose }) {
   const reviews = useAsync(() => api(`/marketplace/engineers/${engineer.id}/reviews`), [engineer.id]);

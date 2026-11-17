@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import './design.css';
+import { IcX } from './icons.jsx';
 
 /** Aparece suavemente al entrar al viewport. */
 export function Reveal({ as: Tag = 'div', delay = 0, className = '', children, ...props }) {
@@ -52,13 +53,38 @@ export function Modal({ title, onClose, children, wide }) {
   }, [onClose]);
   return (
     <div className="gs-modal-back" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-      <div className="gs-card gs-modal" role="dialog" aria-modal="true" aria-label={title} style={wide ? { width: 'min(820px,100%)' } : undefined}>
-        <div className="gs-row" style={{ justifyContent: 'space-between', marginBottom: 12 }}><h2 className="gs-h2" style={{ margin: 0 }}>{title}</h2><button className="gs-btn gs-btn--sm" onClick={onClose}>Cerrar</button></div>
+      <div className="gs-card gs-modal" role="dialog" aria-modal="true" aria-label={title} style={wide ? { width: 'min(860px,100%)' } : undefined}>
+        <div className="gs-modal-head"><h2 className="gs-h2">{title}</h2><button className="gs-btn gs-btn--sm" onClick={onClose} aria-label="Cerrar ventana"><IcX size={16} /> Cerrar</button></div>
         {children}
       </div>
     </div>
   );
 }
+
+/** Encabezado de sección numerada: "01 — Salas" + título + texto de apoyo opcional. */
+export function SectionHead({ n, label, title, aside }) {
+  return (
+    <div className="gs-section-head gs-cols">
+      <div className="c-7">
+        <span className="gs-section-num">{String(n).padStart(2, '0')}</span>
+        <span className="gs-section-label">{label}</span>
+        <h2 className="gs-section-title" style={{ marginTop: 16 }}>{title}</h2>
+      </div>
+      {aside && <p className="gs-section-aside c-4 s-9" style={{ alignSelf: 'end', margin: 0 }}>{aside}</p>}
+    </div>
+  );
+}
+
+/** Foto real del proyecto dentro de un marco plano. */
+export const Photo = ({ src, alt, className = '', style, ...props }) => <figure className={`gs-photo ${className}`} style={style} {...props}><img src={src} alt={alt} loading="lazy" /></figure>;
+
+/** Marcador de foto: bloque plano con diagonales y rótulo "FOTO" para que nadie lo confunda con una imagen final. */
+export const Placeholder = ({ label, ratio = '4 / 3', className = '', style }) => (
+  <figure className={`gs-ph ${className}`} style={{ aspectRatio: ratio, ...style }} role="img" aria-label={`Espacio reservado para fotografía: ${label}`}>
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="0" x2="100" y2="100" /><line x1="100" y1="0" x2="0" y2="100" /></svg>
+    <figcaption><b>Foto</b>{label}</figcaption>
+  </figure>
+);
 
 export function Tabs({ tabs, value, onChange }) {
   return <div className="gs-tabs" role="tablist">{tabs.map(([id, label, badge]) => <button key={id} role="tab" aria-selected={value === id} className={value === id ? 'active' : ''} onClick={() => onChange(id)}>{label}{badge ? ` · ${badge}` : ''}</button>)}</div>;

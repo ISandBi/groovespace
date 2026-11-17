@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FaCheckCircle } from 'react-icons/fa';
+import { IcCheckCircle } from '../../ui/icons.jsx';
 import { api, formatDateTime } from '../../lib/http';
 import { Empty, ErrorNote, Field, Modal, Skeleton, toast, useAsync } from '../../ui/kit.jsx';
 import { loadCatalog } from '../../lib/quote';
@@ -52,7 +52,7 @@ export default function Contracts({ actor }) {
               <div className="gs-row" style={{ justifyContent: 'space-between' }}><span className="gs-badge gs-badge--violet">{KIND[contract.kind]}</span><span className={`gs-badge ${contract.status === 'fully_signed' ? 'gs-badge--ok' : 'gs-badge--warn'}`}>{contract.status === 'fully_signed' ? 'Firmado por todos' : `Firmas ${contract.signatures.length}/${contract.parties.length}`}</span></div>
               <h3 style={{ color: 'var(--color-text-title)', margin: '12px 0 6px' }}>{contract.title}</h3>
               {contract.splits.length > 0 && <div className="gs-list" style={{ marginBottom: 10 }}>{contract.splits.map((split) => <div className="gs-item" key={split.key}><span>{split.label}</span><b>{split.percent}%</b></div>)}</div>}
-              <div className="gs-list">{contract.parties.map((party) => { const signature = contract.signatures.find((item) => item.key === party.key); return <div key={party.key} className="gs-hint">{signature ? <><FaCheckCircle color="var(--color-brand-primary)" /> {party.name} · {formatDateTime(signature.signedAt)}</> : `⏳ Falta ${party.name}`}</div>; })}</div>
+              <div className="gs-list">{contract.parties.map((party) => { const signature = contract.signatures.find((item) => item.key === party.key); return <div key={party.key} className="gs-hint">{signature ? <><IcCheckCircle color="var(--color-brand-primary)" /> {party.name} · {formatDateTime(signature.signedAt)}</> : `⏳ Falta ${party.name}`}</div>; })}</div>
               <p className="gs-hint" style={{ fontFamily: 'ui-monospace,monospace', wordBreak: 'break-all' }}>Huella {contract.bodyHash.slice(0, 20)}… · NOM-151: {contract.provider.nom151.status === 'not_connected' ? 'sin conectar' : contract.provider.nom151.status}</p>
               {!mySignature && contract.status === 'pending_signatures' && contract.parties.some((party) => party.key === myKey) && <button className="gs-btn gs-btn--sm gs-btn--primary" onClick={() => setSigning(contract)}>Revisar y firmar</button>}
             </div>);

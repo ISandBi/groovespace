@@ -6,7 +6,12 @@ const EVENT = 'gs:navigate';
 export const navigate = (to, { replace = false } = {}) => {
   window.history[replace ? 'replaceState' : 'pushState']({}, '', to);
   window.dispatchEvent(new Event(EVENT));
-  window.scrollTo({ top: 0 });
+  const hash = typeof to === 'string' && to.includes('#') ? to.slice(to.indexOf('#') + 1) : '';
+  if (!hash) { window.scrollTo({ top: 0 }); return; }
+  // Con ancla: esperar al render de la página y desplazarse a la sección.
+  let tries = 0;
+  const seek = () => { const node = document.getElementById(hash); if (node) node.scrollIntoView(); else if (tries++ < 20) setTimeout(seek, 50); };
+  setTimeout(seek, 0);
 };
 
 export const useLocation = () => {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FaCheckCircle } from 'react-icons/fa';
+import { IcCheckCircle } from '../ui/icons.jsx';
 import { API_URL, readApiResponse } from '../api';
 import { api } from '../lib/http';
 import { ErrorNote, Field } from '../ui/kit.jsx';
@@ -59,7 +59,7 @@ export default function Access({ onSuccess, intro, startRegister = false }) {
     return (
       <div className="gs-page" style={{ maxWidth: 640 }}>
         <div className="gs-card" style={{ textAlign: 'center' }}>
-          <FaCheckCircle size={34} color="var(--color-brand-primary)" />
+          <IcCheckCircle size={34} color="var(--color-brand-primary)" />
           <h1 className="gs-h1" style={{ fontSize: 28 }}>¡{created.bandName} ya existe!</h1>
           {created.logoProvisional && <p className="gs-hint">Te asignamos un logo provisional de GrooveSpace; lo cambias cuando quieras desde tu perfil.</p>}
           <p style={{ color: 'var(--color-text-body)' }}>Invita a tu banda ahora, o hazlo más tarde desde “Equipo”.</p>

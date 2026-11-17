@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FaDownload, FaTrash } from 'react-icons/fa';
+import { IcDownload, IcTrash } from '../../ui/icons.jsx';
 import { API_URL, api, absoluteApi, formatBytes, formatDateTime } from '../../lib/http';
 import { Empty, ErrorNote, Skeleton, toast, useAsync } from '../../ui/kit.jsx';
 import DemoUploader, { demoStatusBadge } from '../../components/DemoUploader.jsx';
@@ -33,7 +33,7 @@ export function Files({ actor }) {
         {manager && <div className="gs-row"><select className="gs-input" style={{ width: 'auto', minHeight: 36 }} value={visibility} onChange={(e) => setVisibility(e.target.value)} aria-label="Visibilidad"><option value="band">Sólo la banda</option><option value="engineer">Banda e ingeniero</option></select><label className="gs-btn gs-btn--sm gs-btn--primary" style={{ cursor: 'pointer' }}>{busy ? 'Subiendo…' : 'Subir archivo'}<input hidden type="file" onChange={upload} disabled={busy} /></label></div>}
       </div>
       <p className="gs-hint">PDF, imágenes, audio y video: partituras, letras, riders, referencias. Se guardan en almacenamiento privado (S3 en producción).</p>
-      {files.loading ? <Skeleton rows={2} /> : files.error ? <ErrorNote error={files.error} /> : files.data.length === 0 ? <Empty>Aún no hay archivos.</Empty> : <div className="gs-list">{files.data.map((file) => <div className="gs-item" key={file.id}><div><b style={{ color: 'var(--color-text-title)' }}>{file.name}</b><div className="gs-hint">{formatBytes(file.size)} · {file.visibility === 'engineer' ? 'Visible al ingeniero' : 'Sólo la banda'} · {formatDateTime(file.createdAt)}</div></div><div className="gs-row"><button className="gs-btn gs-btn--sm" onClick={() => download(file)}><FaDownload /></button>{manager && <button className="gs-btn gs-btn--sm gs-btn--danger" aria-label="Eliminar" onClick={() => remove(file)}><FaTrash /></button>}</div></div>)}</div>}
+      {files.loading ? <Skeleton rows={2} /> : files.error ? <ErrorNote error={files.error} /> : files.data.length === 0 ? <Empty>Aún no hay archivos.</Empty> : <div className="gs-list">{files.data.map((file) => <div className="gs-item" key={file.id}><div><b style={{ color: 'var(--color-text-title)' }}>{file.name}</b><div className="gs-hint">{formatBytes(file.size)} · {file.visibility === 'engineer' ? 'Visible al ingeniero' : 'Sólo la banda'} · {formatDateTime(file.createdAt)}</div></div><div className="gs-row"><button className="gs-btn gs-btn--sm" onClick={() => download(file)}><IcDownload /></button>{manager && <button className="gs-btn gs-btn--sm gs-btn--danger" aria-label="Eliminar" onClick={() => remove(file)}><IcTrash /></button>}</div></div>)}</div>}
     </div>
   );
 }

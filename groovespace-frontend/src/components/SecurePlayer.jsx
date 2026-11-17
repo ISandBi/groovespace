@@ -1,5 +1,5 @@
 import { useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { FaPause, FaPlay } from 'react-icons/fa';
+import { IcPause, IcPlay } from '../ui/icons.jsx';
 import { formatClock } from '../lib/http';
 
 /**
@@ -46,7 +46,7 @@ export default function SecurePlayer({ loadUrl, kind = 'audio', label, apiRef, o
       {kind === 'video' && <video {...common} disablePictureInPicture playsInline style={{ width: '100%', maxHeight: 360, borderRadius: 10, background: '#000' }} />}
       {kind !== 'video' && <audio {...common} />}
       <div className="gs-row" style={{ flexWrap: 'nowrap' }}>
-        <button type="button" className="gs-btn gs-btn--sm gs-btn--primary" style={{ minWidth: 44 }} onClick={toggle} aria-label={playing ? 'Pausar' : 'Reproducir'} disabled={busy}>{playing ? <FaPause /> : <FaPlay />}</button>
+        <button type="button" className="gs-btn gs-btn--sm gs-btn--primary" style={{ minWidth: 44 }} onClick={toggle} aria-label={playing ? 'Pausar' : 'Reproducir'} disabled={busy}>{playing ? <IcPause /> : <IcPlay />}</button>
         <div style={{ flex: 1, minWidth: 0 }}>
           {label && <div style={{ fontWeight: 800, fontSize: 13, color: 'var(--color-text-title)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</div>}
           <input type="range" min="0" max={duration || 0} step="0.1" value={time} aria-label="Posición" style={{ width: '100%', accentColor: 'var(--color-brand-primary)' }} onChange={(event) => { if (media.current) media.current.currentTime = Number(event.target.value); }} disabled={!src} />

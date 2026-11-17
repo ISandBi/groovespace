@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { FaCheck, FaDownload } from 'react-icons/fa';
+import { IcCheck, IcDownload } from '../ui/icons.jsx';
 import { api, absoluteApi, formatBytes, formatClock, formatDateTime } from '../lib/http';
 import { ErrorNote, toast } from '../ui/kit.jsx';
 import SecurePlayer from './SecurePlayer.jsx';
@@ -46,9 +46,9 @@ export default function DeliverableCard({ deliverable, token, role, canApprove, 
               <p className="gs-hint">{version.label} · {formatBytes(version.size)} · {version.lossless ? 'Sin pérdida' : 'Comprimido'} · {formatDateTime(version.uploadedAt)}{version.notes ? ` · ${version.notes}` : ''}</p>
               <SecurePlayer key={`${deliverable._id}-${version.n}`} kind={version.kind === 'video' ? 'video' : 'audio'} label={`${deliverable.title} · ${version.label}`} apiRef={player} loadUrl={async () => absoluteApi((await api(`${base}/versions/${version.n}/stream-token`, { method: 'POST', token, body: {} })).url)} />
               <div className="gs-row" style={{ margin: '10px 0' }}>
-                {role === 'band' && canApprove && !version.approvedAt && <button className="gs-btn gs-btn--sm gs-btn--primary" onClick={approve}><FaCheck /> Aprobar esta versión</button>}
+                {role === 'band' && canApprove && !version.approvedAt && <button className="gs-btn gs-btn--sm gs-btn--primary" onClick={approve}><IcCheck /> Aprobar esta versión</button>}
                 {version.approvedAt && <span className="gs-badge gs-badge--ok">Aprobada {formatDateTime(version.approvedAt)}</span>}
-                {version.approvedAt && <button className="gs-btn gs-btn--sm" onClick={download}><FaDownload /> Descargar master</button>}
+                {version.approvedAt && <button className="gs-btn gs-btn--sm" onClick={download}><IcDownload /> Descargar master</button>}
                 {!version.approvedAt && <span className="gs-hint">La descarga se habilita al aprobar.</span>}
               </div>
               <h4 style={{ color: 'var(--color-text-title)', margin: '14px 0 8px' }}>Comentarios por minuto</h4>

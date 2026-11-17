@@ -1,4 +1,4 @@
-import { FaMicrophoneAlt } from 'react-icons/fa';
+import { IcMic } from '../ui/icons.jsx';
 import { mxn } from '../lib/http';
 
 const toggle = (list, id) => (list.includes(id) ? list.filter((item) => item !== id) : [...list, id]);
@@ -45,7 +45,7 @@ export function QuoteBuilder({ catalog, room, draft, setDraft }) {
       </section>
 
       <section className="gs-card">
-        <h2 className="gs-h2"><FaMicrophoneAlt /> Ingeniero <small className="gs-hint">opcional</small></h2>
+        <h2 className="gs-h2"><IcMic /> Ingeniero <small className="gs-hint">opcional</small></h2>
         <div className="gs-grid gs-grid--2" style={{ gap: 10 }}>
           <label className={`gs-choice ${!draft.engineerId ? 'on' : ''}`}><input type="radio" name="eng" checked={!draft.engineerId} onChange={() => update({ engineerId: '' })} /><div><b>Sin ingeniero</b><small>Sesión autogestionada</small></div></label>
           {catalog.engineers.map((engineer) => (

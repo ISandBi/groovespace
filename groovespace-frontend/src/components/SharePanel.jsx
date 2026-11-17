@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { FaEnvelope, FaTelegramPlane, FaWhatsapp, FaCopy } from 'react-icons/fa';
+import { IcMail, IcCopy } from '../ui/icons.jsx';
+import { FaTelegramPlane, FaWhatsapp } from 'react-icons/fa';
 import { api } from '../lib/http';
 import { ErrorNote, toast } from '../ui/kit.jsx';
 
@@ -37,8 +38,8 @@ export default function SharePanel({ token }) {
       <div className="gs-row" style={{ margin: '12px 0' }}>
         <a className="gs-btn" href={links.share.whatsapp} target="_blank" rel="noreferrer" style={{ borderColor: '#25d366', color: '#25d366' }}><FaWhatsapp /> WhatsApp</a>
         <a className="gs-btn" href={links.share.telegram} target="_blank" rel="noreferrer" style={{ borderColor: '#35a7e6', color: '#35a7e6' }}><FaTelegramPlane /> Telegram</a>
-        <a className="gs-btn" href={links.share.email}><FaEnvelope /> Mi correo</a>
-        <button className="gs-btn" onClick={copy}><FaCopy /> Copiar</button>
+        <a className="gs-btn" href={links.share.email}><IcMail /> Mi correo</a>
+        <button className="gs-btn" onClick={copy}><IcCopy /> Copiar</button>
       </div>
       <form onSubmit={sendEmails}>
         <label className="gs-field"><span>O envía la invitación desde GrooveSpace (hasta 10 correos)</span><input value={emails} onChange={(event) => setEmails(event.target.value)} placeholder="ana@correo.com, luis@correo.com" /></label>
