@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { IcCheckCircle } from '../ui/icons.jsx';
+import { IcCheckCircle, IcX } from '../ui/icons.jsx';
 import { API_URL, readApiResponse } from '../api';
 import { api } from '../lib/http';
 import { ErrorNote, Field } from '../ui/kit.jsx';
@@ -58,12 +58,12 @@ export default function Access({ onSuccess, intro, startRegister = false }) {
   if (created) {
     return (
       <div className="gs-page" style={{ maxWidth: 640 }}>
-        <div className="gs-card" style={{ textAlign: 'center' }}>
-          <IcCheckCircle size={34} color="var(--color-brand-primary)" />
-          <h1 className="gs-h1" style={{ fontSize: 28 }}>¡{created.bandName} ya existe!</h1>
+        <div className="gs-card">
+          <IcCheckCircle size={32} color="var(--color-brand-primary)" />
+          <h1 className="gs-h1">{created.bandName} ya está registrada</h1>
           {created.logoProvisional && <p className="gs-hint">Te asignamos un logo provisional de GrooveSpace; lo cambias cuando quieras desde tu perfil.</p>}
           <p style={{ color: 'var(--color-text-body)' }}>Invita a tu banda ahora, o hazlo más tarde desde “Equipo”.</p>
-          <div style={{ textAlign: 'left', margin: '18px 0' }}><SharePanel token={created.accessToken} /></div>
+          <div style={{ margin: 'var(--s-3) 0' }}><SharePanel token={created.accessToken} /></div>
           <button className="gs-btn gs-btn--primary gs-btn--block" onClick={() => onSuccess(created)}>Continuar</button>
         </div>
       </div>
@@ -73,9 +73,9 @@ export default function Access({ onSuccess, intro, startRegister = false }) {
   return (
     <div className="gs-page" style={{ maxWidth: 680 }}>
       <p className="gs-eyebrow">{isLogin ? 'Acceso' : 'Registro'}</p>
-      <h1 className="gs-h1">{isLogin ? 'Entra a tu banda' : 'Crea el perfil de tu banda'}</h1>
-      {intro && <p className="gs-hint" style={{ marginTop: 10 }}>{intro}</p>}
-      <form className="gs-card" style={{ marginTop: 22 }} onSubmit={isLogin ? login : register}>
+      <h1 className="gs-h1">{isLogin ? 'Entra a tu banda' : 'Registra a tu banda'}</h1>
+      {intro && <p className="gs-lead" style={{ marginTop: 16 }}>{intro}</p>}
+      <form className="gs-card" style={{ marginTop: 'var(--s-4)' }} onSubmit={isLogin ? login : register}>
         {!isLogin && <Field label="Nombre de la banda"><input required value={form.name} onChange={set('name')} placeholder="Ej. Los Pixies CDMX" disabled={busy} /></Field>}
         {isLogin ? (
           <Field label="Correo"><input type="email" autoComplete="email" required value={form.email} onChange={set('email')} disabled={busy} /></Field>
@@ -98,7 +98,7 @@ export default function Access({ onSuccess, intro, startRegister = false }) {
                 <div key={index} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 8 }}>
                   <input value={item.name} placeholder="Ej. Batería, Bajo Jazz" onChange={(event) => setInstruments((list) => list.map((entry, i) => (i === index ? { ...entry, name: event.target.value } : entry)))} />
                   <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => setInstruments((list) => list.map((entry, i) => (i === index ? { ...entry, file: event.target.files?.[0] || null } : entry)))} />
-                  <button type="button" className="gs-btn gs-btn--sm" aria-label="Quitar" onClick={() => setInstruments((list) => list.filter((_, i) => i !== index))}>✕</button>
+                  <button type="button" className="gs-btn gs-btn--sm" aria-label="Quitar" onClick={() => setInstruments((list) => list.filter((_, i) => i !== index))}><IcX size={16} /></button>
                 </div>
               ))}
               <button type="button" className="gs-btn gs-btn--sm" onClick={() => setInstruments((list) => [...list, { name: '', file: null }])} disabled={instruments.length >= 12}>+ Agregar instrumento</button>
@@ -111,8 +111,8 @@ export default function Access({ onSuccess, intro, startRegister = false }) {
           </>
         )}
         <ErrorNote error={error} />
-        <button className="gs-btn gs-btn--primary gs-btn--block" disabled={busy}>{busy ? 'Procesando…' : isLogin ? 'Entrar' : 'Registrar banda'}</button>
-        <button type="button" className="gs-btn gs-btn--block" style={{ marginTop: 10, border: 0 }} onClick={() => { setIsLogin(!isLogin); setError(''); }}>{isLogin ? 'Crear perfil de banda' : 'Ya tengo cuenta'}</button>
+        <button className="gs-btn gs-btn--primary gs-btn--block" disabled={busy}>{busy ? 'Procesando…' : isLogin ? 'Entrar' : 'Crear cuenta de la banda'}</button>
+        <button type="button" className="gs-btn gs-btn--block gs-btn--text" style={{ marginTop: 10 }} onClick={() => { setIsLogin(!isLogin); setError(''); }}>{isLogin ? 'No tengo cuenta: registrar mi banda' : 'Ya tengo cuenta: entrar'}</button>
       </form>
     </div>
   );

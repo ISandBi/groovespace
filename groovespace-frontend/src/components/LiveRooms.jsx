@@ -18,7 +18,7 @@ export default function LiveRooms({ token, refreshKey }) {
   return (
     <div className="gs-grid">
       {rooms.map((room) => (
-        <div key={room.roomId} className="gs-card" style={room.live ? { borderColor: 'rgba(255,59,78,.55)', boxShadow: '0 0 40px rgba(255,59,78,.14)' } : undefined}>
+        <div key={room.roomId} className="gs-card" style={room.live ? { borderColor: 'var(--gs-live)' } : undefined}>
           <div className="gs-row" style={{ justifyContent: 'space-between' }}><b style={{ color: 'var(--color-text-title)' }}>{room.name}</b><span className={`gs-live ${room.live ? '' : 'off'}`}><i />{room.live ? 'En vivo' : 'Libre'}</span></div>
           {room.live ? <p style={{ color: 'var(--color-text-body)', margin: '12px 0 0' }}><b>{room.current.bandName}</b><br /><span className="gs-hint">Termina {new Date(room.current.endsAt).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })} · quedan {room.current.minutesLeft} min</span></p> : <p className="gs-hint" style={{ margin: '12px 0 0' }}>Sin banda dentro.</p>}
           {room.next && <p className="gs-hint" style={{ marginTop: 8 }}>Siguiente: {room.next.startTime} · {room.next.bandName}</p>}

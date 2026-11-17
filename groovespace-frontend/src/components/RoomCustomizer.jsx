@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { IcMinimize, IcMaximize, IcSave } from '../ui/icons.jsx';
+import { IcMinimize, IcMaximize, IcMove, IcMute, IcPlay, IcSave, IcVolume } from '../ui/icons.jsx';
 import {
   ACESFilmicToneMapping,
   AmbientLight,
@@ -665,23 +665,23 @@ export default function RoomCustomizer({ reservation, instruments, accessToken }
   };
 
   const overlayButton = {
-    background: 'rgba(15,18,22,.78)',
+    background: '#100d17',
     color: '#fff',
-    border: '1px solid rgba(255,255,255,.28)',
-    borderRadius: '999px',
+    border: '1px solid #7a6b88',
+    borderRadius: 0,
     padding: '8px 14px',
     fontSize: '12px',
     cursor: 'pointer',
     display: 'inline-flex',
     alignItems: 'center',
     gap: '6px',
-    backdropFilter: 'blur(6px)'
+    minHeight: 40
   };
 
   const viewport = (
     <div style={fullscreen
       ? { position: 'fixed', inset: 0, zIndex: 2000, background: '#0f1216', display: 'flex', flexDirection: 'column' }
-      : { position: 'relative', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,.12)' }}>
+      : { position: 'relative', overflow: 'hidden', border: '1px solid #7a6b88' }}>
       <div ref={canvasHost} style={{ flex: 1, height: fullscreen ? '100%' : 'clamp(440px, 74vh, 780px)', width: '100%', touchAction: 'none' }} />
       <div style={{ position: 'absolute', top: 12, left: 12, right: 12, display: 'flex', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap', pointerEvents: 'none' }}>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', pointerEvents: 'auto' }}>
@@ -690,10 +690,10 @@ export default function RoomCustomizer({ reservation, instruments, accessToken }
           <button type="button" style={overlayButton} onClick={() => setView('front')}>Frente</button>
         </div>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', pointerEvents: 'auto' }}>
-          <button type="button" aria-pressed={mode === 'play'} style={{ ...overlayButton, borderColor: mode === 'play' ? '#c2ff3c' : undefined, color: mode === 'play' ? '#c2ff3c' : '#fff' }} onClick={() => setMode('play')}>🎵 Modo tocar</button>
-          <button type="button" aria-pressed={mode === 'move'} style={{ ...overlayButton, borderColor: mode === 'move' ? '#c2ff3c' : undefined, color: mode === 'move' ? '#c2ff3c' : '#fff' }} onClick={() => setMode('move')}>✥ Modo acomodar</button>
+          <button type="button" aria-pressed={mode === 'play'} style={{ ...overlayButton, borderColor: mode === 'play' ? '#c2ff3c' : undefined, color: mode === 'play' ? '#c2ff3c' : '#fff' }} onClick={() => setMode('play')}><IcPlay size={14} /> Tocar</button>
+          <button type="button" aria-pressed={mode === 'move'} style={{ ...overlayButton, borderColor: mode === 'move' ? '#c2ff3c' : undefined, color: mode === 'move' ? '#c2ff3c' : '#fff' }} onClick={() => setMode('move')}><IcMove size={14} /> Acomodar</button>
           <label style={{ ...overlayButton, cursor: 'default' }}>
-            <button type="button" aria-label={muted ? 'Activar sonido' : 'Silenciar'} onClick={() => setMuted((value) => !value)} style={{ background: 'none', border: 0, color: 'inherit', cursor: 'pointer', padding: 0 }}>{muted ? '🔇' : '🔊'}</button>
+            <button type="button" aria-label={muted ? 'Activar sonido' : 'Silenciar'} onClick={() => setMuted((value) => !value)} style={{ background: 'none', border: 0, color: 'inherit', cursor: 'pointer', padding: 0 }}>{muted ? <IcMute size={16} /> : <IcVolume size={16} />}</button>
             <input type="range" min="0" max="1" step="0.05" value={volume} aria-label="Volumen" onChange={(event) => setVolume(Number(event.target.value))} style={{ width: 80 }} />
           </label>
           <button type="button" style={overlayButton} onClick={() => setFullscreen((value) => !value)}>
@@ -706,13 +706,13 @@ export default function RoomCustomizer({ reservation, instruments, accessToken }
       </div>
       <div style={{ position: 'absolute', left: 12, right: 12, bottom: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', flexWrap: 'wrap', pointerEvents: 'none' }}>
         <span style={{ ...overlayButton, cursor: 'default', fontSize: '11px', color: saved ? '#c2ff3c' : '#fff' }} role="status">
-          {nowPlaying ? `♪ ${nowPlaying}` : mode === 'play' ? 'Toca cualquier parte del instrumento para escucharlo · Arrastra el fondo para girar' : `${saved ? 'Distribución guardada' : 'Cambios sin guardar'} · Arrastra un instrumento para moverlo`}
+          {nowPlaying ? `Sonando: ${nowPlaying}` : mode === 'play' ? 'Toca cualquier parte del instrumento para escucharlo · Arrastra el fondo para girar' : `${saved ? 'Distribución guardada' : 'Cambios sin guardar'} · Arrastra un instrumento para moverlo`}
         </span>
         <button type="button" className="btn-grid-action" style={{ pointerEvents: 'auto' }} onClick={saveLayout} disabled={saving}>
           <IcSave /> {saving ? 'Guardando...' : 'Guardar sala'}
         </button>
       </div>
-      {fullscreen && error && <p role="alert" style={{ position: 'absolute', top: 60, left: 12, margin: 0, color: '#ffb4b4', background: 'rgba(15,18,22,.85)', padding: '8px 12px', borderRadius: '8px', fontSize: '13px' }}>{error}</p>}
+      {fullscreen && error && <p role="alert" style={{ position: 'absolute', top: 60, left: 12, margin: 0, color: '#ffb4b4', background: '#100d17', padding: '8px 12px', fontSize: '13px' }}>{error}</p>}
     </div>
   );
 

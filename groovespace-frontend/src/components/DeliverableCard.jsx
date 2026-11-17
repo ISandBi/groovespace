@@ -36,11 +36,11 @@ export default function DeliverableCard({ deliverable, token, role, canApprove, 
       <div className="gs-steps" style={{ margin: '14px 0' }}>
         {STAGES.map(([id, label], index) => (role === 'engineer'
           ? <button key={id} className={`gs-btn gs-btn--sm ${index === stageIndex ? 'gs-btn--primary' : ''}`} onClick={() => stage(id)}>{label}</button>
-          : <span key={id} className={index === stageIndex ? 'on' : index < stageIndex ? 'done' : ''}>{index < stageIndex ? '✓ ' : ''}{label}</span>))}
+          : <span key={id} className={index === stageIndex ? 'on' : index < stageIndex ? 'done' : ''}>{index < stageIndex ? 'Listo · ' : ''}{label}</span>))}
       </div>
       {deliverable.versions.length === 0 ? <p className="gs-hint">Aún no hay versiones{role === 'band' ? '. Te avisaremos cuando tu ingeniero suba la primera.' : '. Sube la primera abajo.'}</p> : (
         <>
-          <div className="gs-row" style={{ marginBottom: 10 }}>{deliverable.versions.map((item) => <button key={item.n} className={`gs-btn gs-btn--sm ${item.n === versionN ? 'gs-btn--primary' : ''}`} onClick={() => setVersionN(item.n)}>v{item.n}{item.approvedAt ? ' ✓' : ''}</button>)}</div>
+          <div className="gs-row" style={{ marginBottom: 10 }}>{deliverable.versions.map((item) => <button key={item.n} className={`gs-btn gs-btn--sm ${item.n === versionN ? 'gs-btn--primary' : ''}`} onClick={() => setVersionN(item.n)}>v{item.n}{item.approvedAt ? ' · aprobada' : ''}</button>)}</div>
           {version && (
             <>
               <p className="gs-hint">{version.label} · {formatBytes(version.size)} · {version.lossless ? 'Sin pérdida' : 'Comprimido'} · {formatDateTime(version.uploadedAt)}{version.notes ? ` · ${version.notes}` : ''}</p>

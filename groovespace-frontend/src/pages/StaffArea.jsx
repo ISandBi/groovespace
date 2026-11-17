@@ -61,7 +61,7 @@ function Applications({ event, token, onClose }) {
     <Modal title={`Postulaciones · ${event.title}`} wide onClose={onClose}>
       {apps.loading ? <Skeleton rows={2} /> : apps.data?.length ? <div className="gs-list">{apps.data.map((item) => (
         <div className="gs-item" key={item.id}>
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}><img src={assetUrl(item.band?.logoPath)} alt="" width="44" height="44" style={{ borderRadius: 10, objectFit: 'cover' }} /><div><b>{item.band?.name}</b><div className="gs-hint">{item.band?.genre} · {item.message || 'Sin mensaje'}</div></div></div>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}><img src={assetUrl(item.band?.logoPath)} alt="" width="44" height="44" style={{ borderRadius: 0, objectFit: 'cover' }} /><div><b>{item.band?.name}</b><div className="gs-hint">{item.band?.genre} · {item.message || 'Sin mensaje'}</div></div></div>
           <div className="gs-row"><span className="gs-badge">{item.status}</span>{['accepted', 'waitlist', 'rejected'].map((status) => <button key={status} className={`gs-btn gs-btn--sm ${item.status === status ? 'gs-btn--primary' : ''}`} onClick={() => decide(item.id, status)}>{{ accepted: 'Aceptar', waitlist: 'Espera', rejected: 'Rechazar' }[status]}</button>)}</div>
         </div>))}</div> : <Empty>Aún no hay postulaciones.</Empty>}
     </Modal>
@@ -116,7 +116,7 @@ function Operations({ token }) {
         {upcoming.length === 0 ? <Empty>Sin sesiones próximas.</Empty> : <div className="gs-list">{upcoming.slice(0, 40).map((item) => <div className="gs-item" key={item._id}><div><b style={{ color: 'var(--color-text-title)' }}>{item.bandId?.name || 'Banda'}</b><div className="gs-hint">{item.roomName} · {formatDate(item.date)} · {item.startTime} · {item.duration} h</div></div><div className="gs-row"><span className="gs-badge">{item.paymentStatus}</span><button className="gs-btn gs-btn--sm" onClick={() => setChat(item)}>Chat</button></div></div>)}</div>}
       </div>
       <div className="gs-card"><h2 className="gs-h2">Bandas</h2>
-        <div className="gs-list">{bands.map((band) => <div className="gs-item" key={band._id}><div style={{ display: 'flex', gap: 12, alignItems: 'center' }}><img src={assetUrl(band.logoPath)} alt="" width="40" height="40" style={{ borderRadius: 10, objectFit: 'cover' }} /><div><b>{band.name}</b><div className="gs-hint">Líder {band.leaderName} · {band.members?.length || 0} integrantes · {band.instruments?.length || 0} instrumentos</div></div></div><button className="gs-btn gs-btn--sm gs-btn--danger" onClick={() => remove(band)}>Eliminar</button></div>)}</div>
+        <div className="gs-list">{bands.map((band) => <div className="gs-item" key={band._id}><div style={{ display: 'flex', gap: 12, alignItems: 'center' }}><img src={assetUrl(band.logoPath)} alt="" width="40" height="40" style={{ borderRadius: 0, objectFit: 'cover' }} /><div><b>{band.name}</b><div className="gs-hint">Líder {band.leaderName} · {band.members?.length || 0} integrantes · {band.instruments?.length || 0} instrumentos</div></div></div><button className="gs-btn gs-btn--sm gs-btn--danger" onClick={() => remove(band)}>Eliminar</button></div>)}</div>
       </div>
       {chat && <Modal title={`Chat · ${chat.bandId?.name}`} onClose={() => setChat(null)}><ChatBox reservationId={chat._id} token={token} selfType="staff" /></Modal>}
     </div>

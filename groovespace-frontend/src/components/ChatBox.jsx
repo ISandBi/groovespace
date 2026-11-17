@@ -39,7 +39,7 @@ export default function ChatBox({ reservationId, token, selfType }) {
         {messages.length === 0 && <p className="gs-hint">Aún no hay mensajes. Coordina aquí detalles de la sesión.</p>}
         {messages.map((message) => {
           const mine = message.senderType === selfType;
-          return <div key={message.id} style={{ justifySelf: mine ? 'end' : 'start', maxWidth: '82%', padding: '9px 13px', borderRadius: 14, background: mine ? 'rgba(194,255,60,.16)' : 'rgba(255,255,255,.07)' }}><div className="gs-hint" style={{ fontSize: 11 }}>{message.senderName} · {formatDateTime(message.createdAt)}</div><div style={{ color: 'var(--color-text-title)', overflowWrap: 'anywhere' }}>{message.text}</div></div>;
+          return <div key={message.id} style={{ justifySelf: mine ? 'end' : 'start', maxWidth: '82%', padding: '9px 13px', borderRadius: 0, background: mine ? 'rgba(194,255,60,.16)' : 'rgba(255,255,255,.07)' }}><div className="gs-hint" style={{ fontSize: 11 }}>{message.senderName} · {formatDateTime(message.createdAt)}</div><div style={{ color: 'var(--color-text-title)', overflowWrap: 'anywhere' }}>{message.text}</div></div>;
         })}
         <div ref={bottom} />
       </div>

@@ -57,7 +57,7 @@ export default function Portal() {
     <div className="gs-page">
       <div className="gs-page-head">
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          {sessions.band?.logoPath && <img src={assetUrl(sessions.band.logoPath)} alt="" width="64" height="64" style={{ borderRadius: 16, objectFit: 'cover' }} />}
+          {sessions.band?.logoPath && <img src={assetUrl(sessions.band.logoPath)} alt="" width="64" height="64" style={{ borderRadius: 0, objectFit: 'cover' }} />}
           <div><p className="gs-eyebrow">Portal de banda · {actor.role === 'lider' ? 'Líder' : actor.role === 'tesorero' ? 'Tesorero' : 'Integrante'}</p><h1 className="gs-h1">{actor.name}</h1></div>
         </div>
         <Link to="/" className="gs-btn gs-btn--primary">Reservar sala</Link>

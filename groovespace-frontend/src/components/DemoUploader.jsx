@@ -53,7 +53,7 @@ export default function DemoUploader({ token, engineer, onUploaded }) {
         <input type="checkbox" checked={rights} onChange={(event) => setRights(event.target.checked)} />
         <div><b>Declaro que soy titular de los derechos o tengo autorización</b><small>Respetamos los derechos de autor: sólo se comparte material propio o autorizado. GrooveSpace y el ingeniero firman un acuerdo de uso y confidencialidad.</small></div>
       </label>
-      {progress !== null && <div style={{ height: 8, borderRadius: 4, background: 'rgba(255,255,255,.08)', overflow: 'hidden', marginBottom: 10 }}><div style={{ width: `${progress}%`, height: '100%', background: 'var(--color-brand-primary)', transition: 'width .2s' }} /></div>}
+      {progress !== null && <div style={{ height: 8, borderRadius: 0, background: 'rgba(255,255,255,.08)', overflow: 'hidden', marginBottom: 10 }}><div style={{ width: `${progress}%`, height: '100%', background: 'var(--color-brand-primary)', transition: 'width .2s' }} /></div>}
       <ErrorNote error={error} />
       <button className="gs-btn gs-btn--primary" disabled={!file || !rights || progress !== null}>{progress !== null ? `Subiendo ${progress}%` : 'Enviar demo'}</button>
     </form>

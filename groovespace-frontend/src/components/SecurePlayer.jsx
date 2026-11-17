@@ -43,7 +43,7 @@ export default function SecurePlayer({ loadUrl, kind = 'audio', label, apiRef, o
 
   return (
     <div className="gs-item" style={{ display: 'grid', gap: 10, width: '100%' }}>
-      {kind === 'video' && <video {...common} disablePictureInPicture playsInline style={{ width: '100%', maxHeight: 360, borderRadius: 10, background: '#000' }} />}
+      {kind === 'video' && <video {...common} disablePictureInPicture playsInline style={{ width: '100%', maxHeight: 360, borderRadius: 0, background: '#000' }} />}
       {kind !== 'video' && <audio {...common} />}
       <div className="gs-row" style={{ flexWrap: 'nowrap' }}>
         <button type="button" className="gs-btn gs-btn--sm gs-btn--primary" style={{ minWidth: 44 }} onClick={toggle} aria-label={playing ? 'Pausar' : 'Reproducir'} disabled={busy}>{playing ? <IcPause /> : <IcPlay />}</button>
