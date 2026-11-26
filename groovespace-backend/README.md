@@ -122,6 +122,23 @@ La eliminación de bandas es irreversible: también elimina reservas y el histor
 | `GET` | `/payments/verify/:reservationId/:sessionId` | Banda propietaria | Al volver de PayPal (`token` = id de orden): captura la orden aprobada y concilia importe, moneda y reserva. |
 | `POST` | `/payments/webhook` | PayPal; firma verificada con la API de PayPal | Procesar eventos de PayPal con el cuerpo HTTP sin modificar. |
 
+### App móvil GrooveSpace Music
+
+La app se alimenta de aquí: catálogo público de bandas/demos publicados/letras, cuentas de oyente (distintas de las de banda) y reproducciones válidas con abono a la cartera.
+
+| Método | Ruta | Acceso | Uso |
+| --- | --- | --- | --- |
+| `GET` | `/music/catalog` | Público | Todas las bandas registradas, los demos publicados con su letra y las reglas de abono vigentes. |
+| `GET` | `/music/songs/:id/stream` | Público; solo demos publicados | Transmite el audio de un demo (soporta `Range`). |
+| `POST` | `/music/register` | Público | Crear cuenta de oyente: `{ "name", "email", "password" }` (contraseña ≥ 8 caracteres). |
+| `POST` | `/music/login` | Público | Iniciar sesión de oyente con `{ "email", "password" }`. |
+| `GET` | `/music/me` | Oyente | Consultar la cuenta de oyente autenticada. |
+| `POST` | `/music/plays/start` | Oyente | Abrir una reproducción: `{ "songId" }`. |
+| `POST` | `/music/plays/:id/complete` | Oyente | Cerrar la reproducción; el servidor mide el tiempo transcurrido desde `start` y abona si cumple las reglas (≥ 30 s, una pagada por canción y día, doble abono en las primeras 100 reproducciones de la banda, tope mensual de $1,500 MXN). |
+| `PATCH` | `/demos/:id/publish` | Banda (líder o tesorero) | Publicar o retirar un demo de la app y guardar su letra: `{ "published", "lyrics" }`. |
+
+Para que el teléfono llegue al backend en la misma red local, inicia el servidor con `HOST=0.0.0.0` (ver `.env.example`) y en la app pon `EXPO_PUBLIC_API_URL=http://<IP-de-tu-computadora>:5000` (nunca `localhost`, que en el teléfono no apunta a tu computadora).
+
 También está disponible `GET /api/health` para comprobar el estado del servicio. Las fotos cargadas se sirven bajo `/uploads`.
 
 El catálogo incluye la **Sala E · Orquesta** (`sala_orquesta_e`), con capacidad de hasta 100 músicos y personalización 3D disponible después de confirmar el anticipo. En el modo de demostración, la escena presenta la fotografía real de la sala como entorno y los instrumentos registrados con sus fotografías; permite moverlos y guardar el layout. Cada banda puede tener hasta 100 integrantes registrados.

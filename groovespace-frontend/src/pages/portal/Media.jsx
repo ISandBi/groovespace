@@ -38,6 +38,30 @@ export function Files({ actor }) {
   );
 }
 
+/** Publica el demo en la app móvil GrooveSpace Music y guarda su letra. */
+function AppPublish({ demo, token, manager, onSaved }) {
+  const [lyrics, setLyrics] = useState(demo.lyrics || '');
+  const [busy, setBusy] = useState(false);
+  const save = async (published) => {
+    setBusy(true);
+    try {
+      await api(`/demos/${demo._id}/publish`, { method: 'PATCH', token, body: { published, lyrics } });
+      toast(published ? 'Publicado en la app móvil.' : published === false ? 'Retirado de la app móvil.' : 'Letra guardada.');
+      onSaved();
+    } catch (error) { toast(error.message, 'err'); } finally { setBusy(false); }
+  };
+  return (
+    <div style={{ display: 'grid', gap: 8, marginTop: 10 }}>
+      <div className="gs-row" style={{ justifyContent: 'space-between' }}>
+        <span className={`gs-badge ${demo.published ? 'gs-badge--ok' : ''}`}>{demo.published ? 'Visible en la app móvil' : 'No publicado en la app'}</span>
+        {manager && <button className="gs-btn gs-btn--sm" disabled={busy} onClick={() => save(!demo.published)}>{demo.published ? 'Retirar de la app' : 'Publicar en la app'}</button>}
+      </div>
+      {manager && <label className="gs-field"><span>Letra (se muestra sincronizada en la app)</span><textarea rows={5} maxLength={8000} value={lyrics} onChange={(e) => setLyrics(e.target.value)} placeholder="Escribe la letra, una línea por renglón." /></label>}
+      {manager && lyrics !== (demo.lyrics || '') && <button className="gs-btn gs-btn--sm" style={{ justifySelf: 'start' }} disabled={busy} onClick={() => save(undefined)}>Guardar letra</button>}
+    </div>
+  );
+}
+
 export function Demos({ actor }) {
   const catalog = useAsync(loadCatalog, []);
   const demos = useAsync(() => api('/demos/mine', { token: actor.token }), [actor.token]);
@@ -62,6 +86,7 @@ export function Demos({ actor }) {
               {demo.review?.feedback && <p className="gs-hint">Comentarios del ingeniero: {demo.review.feedback}</p>}
               {demo.agreement?.engineerSignedAt && <p className="gs-hint">Acuerdo firmado por {demo.agreement.engineerName} y {demo.agreement.grooveSpaceSignatory} · escuchado {demo.listens?.length || 0} veces</p>}
               <SecurePlayer kind={demo.kind} label="Escuchar mi demo" loadUrl={async () => absoluteApi((await api(`/demos/${demo._id}/stream-token`, { method: 'POST', token: actor.token })).url)} />
+              <AppPublish demo={demo} token={actor.token} manager={manager} onSaved={demos.reload} />
               {manager && <button className="gs-btn gs-btn--sm gs-btn--danger" style={{ justifySelf: 'start', marginTop: 8 }} onClick={() => remove(demo)}>Eliminar</button>}
             </div>);
         })}</div>}
