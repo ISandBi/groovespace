@@ -19,5 +19,6 @@ module.exports = (app) => {
   app.use('/api/deliverables', require('./deliverables/routes'));
   app.use('/api/contracts', require('./contracts/routes'));
   app.use('/api/demos', require('./demos/routes'));
+  app.use('/api/music', require('./music/routes'));
   app.use('/api/notifications', require('./notifications/routes'));
 };
