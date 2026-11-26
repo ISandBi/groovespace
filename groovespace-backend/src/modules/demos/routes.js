@@ -32,6 +32,8 @@ router.post('/', requireBandManager, rateLimit(60 * 60 * 1000, 20), upload.singl
 router.get('/mine', requireActor('band', 'member'), wrap(async (req, res) => res.status(200).json(await service.listForBand(req.bandId))));
 router.delete('/:id', requireBandManager, wrap(async (req, res) => { await service.remove({ bandId: req.bandId, id: req.params.id }); return res.sendStatus(204); }));
 
+router.patch('/:id/publish', requireBandManager, wrap(async (req, res) => res.status(200).json(await require('../music/service').publish({ bandId: req.bandId, id: req.params.id, published: req.body?.published, lyrics: req.body?.lyrics }))));
+
 router.get('/inbox', requireActor('engineer'), wrap(async (req, res) => res.status(200).json(await service.listForEngineer(req.actor.id))));
 router.post('/:id/sign', requireActor('engineer'), wrap(async (req, res) => res.status(200).json({ demo: await service.sign({ engineerId: req.actor.id, id: req.params.id, fullName: req.body?.fullName, accept: req.body?.accept }) })));
 router.post('/:id/review', requireActor('engineer'), wrap(async (req, res) => res.status(200).json({ demo: await service.review({ engineerId: req.actor.id, id: req.params.id, status: req.body?.status, feedback: req.body?.feedback }) })));

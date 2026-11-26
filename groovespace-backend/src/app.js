@@ -105,7 +105,8 @@ app.use((error, req, res, next) => {
   });
 });
 
-const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1';
+// HOST=0.0.0.0 permite que el teléfono (app móvil) llegue al servidor desde la red local.
+const HOST = process.env.HOST || (process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1');
 app.listen(PORT, HOST, () => {
   console.log(`[GrooveSpace] Servidor encendido en el puerto: ${PORT}`);
 });
