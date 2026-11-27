@@ -56,7 +56,7 @@ function AppPublish({ demo, token, manager, onSaved }) {
         <span className={`gs-badge ${demo.published ? 'gs-badge--ok' : ''}`}>{demo.published ? 'Visible en la app móvil' : 'No publicado en la app'}</span>
         {manager && <button className="gs-btn gs-btn--sm" disabled={busy} onClick={() => save(!demo.published)}>{demo.published ? 'Retirar de la app' : 'Publicar en la app'}</button>}
       </div>
-      {manager && <label className="gs-field"><span>Letra (se muestra sincronizada en la app)</span><textarea rows={5} maxLength={8000} value={lyrics} onChange={(e) => setLyrics(e.target.value)} placeholder="Escribe la letra, una línea por renglón." /></label>}
+      {manager && <label className="gs-field"><span>Letra. Para que vaya sincronizada en la app, escribe el tiempo al inicio de cada línea, por ejemplo [00:12.50] Primera línea</span><textarea rows={5} maxLength={8000} value={lyrics} onChange={(e) => setLyrics(e.target.value)} placeholder="Escribe la letra, una línea por renglón." /></label>}
       {manager && lyrics !== (demo.lyrics || '') && <button className="gs-btn gs-btn--sm" style={{ justifySelf: 'start' }} disabled={busy} onClick={() => save(undefined)}>Guardar letra</button>}
     </div>
   );
