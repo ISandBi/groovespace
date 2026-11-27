@@ -93,7 +93,7 @@ exports.catalog = async () => {
     bands: bands.map((band) => ({
       id: String(band._id), name: band.name, genre: band.genre || '', city: band.district || '', bio: band.bio || '',
       // El logo provisional es un SVG generado: la app móvil no lo dibuja y usa su portada con iniciales.
-      logo: String(band.logoPath || '').startsWith('/uploads/') ? band.logoPath : '', listeners: bandStats.get(String(band._id))?.listeners.size || 0
+      logo: /^(\/uploads\/|\/api\/bands\/media\/)/.test(String(band.logoPath || '')) ? band.logoPath : '', listeners: bandStats.get(String(band._id))?.listeners.size || 0
     })),
     songs,
     ads: ADS,
