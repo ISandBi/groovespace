@@ -7,6 +7,7 @@ const service = require('./service');
 const rateLimit = require('../../middlewares/rateLimit');
 const { requireActor, requireBandManager } = require('../../middlewares/actor');
 const { wrap } = require('../../lib/http');
+const imageUpload = require('../../middlewares/imageUpload');
 
 const MAX_MB = Number(process.env.DEMO_MAX_MB || 600);
 const tmpDir = path.join(os.tmpdir(), 'groovespace-uploads');
@@ -31,6 +32,8 @@ router.post('/', requireBandManager, rateLimit(60 * 60 * 1000, 20), upload.singl
 
 router.get('/mine', requireActor('band', 'member'), wrap(async (req, res) => res.status(200).json(await service.listForBand(req.bandId))));
 router.delete('/:id', requireBandManager, wrap(async (req, res) => { await service.remove({ bandId: req.bandId, id: req.params.id }); return res.sendStatus(204); }));
+
+router.patch('/:id/cover', requireBandManager, imageUpload.single('cover'), wrap(async (req, res) => res.status(200).json(await service.setCover({ bandId: req.bandId, id: req.params.id, file: req.file }))));
 
 router.patch('/:id/publish', requireBandManager, wrap(async (req, res) => res.status(200).json(await require('../music/service').publish({ bandId: req.bandId, id: req.params.id, published: req.body?.published, lyrics: req.body?.lyrics }))));
 
