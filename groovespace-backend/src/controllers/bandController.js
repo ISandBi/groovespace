@@ -1,3 +1,4 @@
+const images = require('../modules/images');
 const { provisionalLogoPath } = require('../modules/branding/logo');
 const { createMemberToken } = require('../middlewares/actor');
 const Band = require('../models/Band');
@@ -66,7 +67,8 @@ exports.registerBand = async (req, res) => {
       return res.status(400).json({ error: 'Esta agrupación ya se encuentra registrada en el sistema.' });
     }
 
-    const logoPath = logoFile ? `/uploads/${logoFile.filename}` : provisionalLogoPath(name.trim());
+    const instrumentPhotoPaths = await Promise.all(instrumentFiles.map((file) => images.saveImage(file)));
+    const logoPath = logoFile ? await images.saveImage(logoFile) : provisionalLogoPath(name.trim());
     const inviteToken = crypto.randomBytes(32).toString('hex');
     const passwordSalt = crypto.randomBytes(16).toString('hex');
     const passwordHash = crypto.scryptSync(password, passwordSalt, 64).toString('hex');
@@ -81,9 +83,9 @@ exports.registerBand = async (req, res) => {
       logoProvisional: !logoFile,
       requiresEngineer: needsEngineer,
       engineerId: needsEngineer ? engineerId : null,
-      instruments: instrumentNames.map((instrument, index) => ({
-        name: instrument.name.trim(),
-        photoPath: `/uploads/${instrumentFiles[index].filename}`
+      instruments: instrumentPhotoPaths.map((photoPath, index) => ({
+        name: instrumentNames[index].name.trim(),
+        photoPath
       })),
       inviteTokenHash: hashToken(inviteToken),
       inviteExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
@@ -179,9 +181,10 @@ exports.addBandInstruments = async (req, res) => {
       instruments.some((instrument) => !instrument.name?.trim())) {
       return res.status(400).json({ error: 'Cada instrumento debe incluir nombre y fotografía.' });
     }
+    const photoPaths = await Promise.all(files.map((file) => images.saveImage(file)));
     const additions = instruments.map((instrument, index) => ({
       name: instrument.name.trim(),
-      photoPath: `/uploads/${files[index].filename}`
+      photoPath: photoPaths[index]
     }));
     const currentBand = await Band.findById(req.bandId).select('instruments');
     if (!currentBand || currentBand.instruments.length + additions.length > 12) {
@@ -355,6 +358,7 @@ exports.deleteBand = async (req, res) => {
   if (!deletedBand) return res.status(404).json({ error: 'No se encontró la banda.' });
   if (purgeSnapshot) cascade.purge(purgeSnapshot).catch((error) => console.error('[GrooveSpace] Limpieza posterior al borrado incompleta.', error.message));
 
+  for (const mediaPath of [deletedBand.logoPath, ...deletedBand.instrumentPaths]) await images.removeImage(mediaPath);
   let deletedFiles = 0;
   const fileFailures = [];
   const uploadDirectory = path.resolve(__dirname, '..', 'uploads');
@@ -376,4 +380,28 @@ exports.deleteBand = async (req, res) => {
     deleted: { reservations: deletedReservations, slots: deletedSlots, files: deletedFiles },
     ...(fileFailures.length ? { warning: 'Algunos archivos no pudieron eliminarse.', fileFailures } : {})
   });
+};
+
+exports.updateBandLogo = async (req, res) => {
+  try {
+    if (req.params.bandId !== req.bandId) return res.status(403).json({ error: 'No tienes acceso a este perfil.' });
+    if (!req.file) return res.status(400).json({ error: 'Selecciona una imagen (.jpg, .png o .webp).' });
+    const band = await Band.findById(req.bandId).select('logoPath');
+    if (!band) return res.status(404).json({ error: 'No se encontró la banda.' });
+    const previous = band.logoPath;
+    const logoPath = await images.saveImage(req.file);
+    await Band.updateOne({ _id: req.bandId }, { $set: { logoPath, logoProvisional: false } });
+    await images.removeImage(previous);
+    return res.status(200).json({ logoPath, logoProvisional: false });
+  } catch {
+    return res.status(500).json({ error: 'No se pudo actualizar el logo. Intenta con otra imagen.' });
+  }
+};
+
+exports.getBandImage = async (req, res) => {
+  try {
+    await images.serveImage(req, res, req.params.file);
+  } catch {
+    if (!res.headersSent) res.status(404).end();
+  }
 };
