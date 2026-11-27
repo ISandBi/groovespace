@@ -74,7 +74,7 @@ const ADS = [
 exports.catalog = async () => {
   const [bands, demos, played] = await Promise.all([
     Band.find({}).select('name genre district bio logoPath createdAt').sort({ name: 1 }).lean(),
-    Demo.find({ published: true }).select('bandId title kind mime lyrics publishedAt size meta').sort({ publishedAt: -1 }).lean(),
+    Demo.find({ published: true }).select('bandId title kind mime lyrics coverPath publishedAt size meta').sort({ publishedAt: -1 }).lean(),
     PlayEntry.aggregate([{ $match: { completedAt: { $ne: null } } }, { $group: { _id: '$demoId', plays: { $sum: 1 }, listeners: { $addToSet: '$listenerId' } } }])
   ]);
   const stats = new Map(played.map((p) => [String(p._id), p]));
@@ -86,14 +86,14 @@ exports.catalog = async () => {
     bandStats.set(String(demo.bandId), entry);
     return {
       id: String(demo._id), bandId: String(demo.bandId), title: demo.title, kind: demo.kind, duration: Math.round(demo.meta?.durationSec || 0),
-      streamPath: `/api/music/songs/${demo._id}/stream`, lyrics: demo.lyrics || '', plays: s ? s.plays : 0, publishedAt: demo.publishedAt
+      streamPath: `/api/music/songs/${demo._id}/stream`, lyrics: demo.lyrics || '', cover: demo.coverPath || '', plays: s ? s.plays : 0, publishedAt: demo.publishedAt
     };
   });
   return {
     bands: bands.map((band) => ({
       id: String(band._id), name: band.name, genre: band.genre || '', city: band.district || '', bio: band.bio || '',
       // El logo provisional es un SVG generado: la app móvil no lo dibuja y usa su portada con iniciales.
-      logo: String(band.logoPath || '').startsWith('/uploads/') ? band.logoPath : '', listeners: bandStats.get(String(band._id))?.listeners.size || 0
+      logo: /^(\/uploads\/|\/api\/bands\/media\/)/.test(String(band.logoPath || '')) ? band.logoPath : '', listeners: bandStats.get(String(band._id))?.listeners.size || 0
     })),
     songs,
     ads: ADS,

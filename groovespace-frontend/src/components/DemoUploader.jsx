@@ -9,6 +9,7 @@ const KIND_TEXT = { audio: 'pista de audio (recomendado WAV o FLAC, sin pérdida
 /** Subida de demo para el ingeniero elegido. El tipo aceptado depende del ingeniero (audio, video o ambos). */
 export default function DemoUploader({ token, engineer, onUploaded }) {
   const [file, setFile] = useState(null);
+  const [cover, setCover] = useState(null);
   const [title, setTitle] = useState('');
   const [holder, setHolder] = useState('');
   const [rights, setRights] = useState(false);
@@ -31,7 +32,14 @@ export default function DemoUploader({ token, engineer, onUploaded }) {
       setProgress(null);
       let data = {};
       try { data = JSON.parse(request.responseText); } catch { /* respuesta vacía */ }
-      if (request.status >= 200 && request.status < 300) { toast('Demo enviado. El ingeniero lo escuchará sin descargarlo.'); setFile(null); setTitle(''); setRights(false); onUploaded?.(data.demo); }
+      if (request.status >= 200 && request.status < 300) {
+        toast('Demo enviado. El ingeniero lo escuchará sin descargarlo.');
+        if (cover && data.demo?._id) {
+          const coverForm = new FormData(); coverForm.append('cover', cover);
+          api(`/demos/${data.demo._id}/cover`, { method: 'PATCH', token, form: coverForm }).catch(() => toast('El demo se envió, pero la portada no se pudo guardar. Intenta de nuevo.', 'err'));
+        }
+        setFile(null); setCover(null); setTitle(''); setRights(false); onUploaded?.(data.demo);
+      }
       else setError(data.error || 'No se pudo subir el demo.');
     };
     request.onerror = () => { setProgress(null); setError('No hubo conexión con el servidor.'); };
@@ -46,6 +54,10 @@ export default function DemoUploader({ token, engineer, onUploaded }) {
       <label className="gs-drop" style={{ display: 'block', margin: '12px 0' }}>
         <IcUpload size={22} /><br />{file ? `${file.name} · ${formatBytes(file.size)}` : 'Elegir archivo'}
         <input type="file" accept={accept} hidden onChange={(event) => setFile(event.target.files?.[0] || null)} />
+      </label>
+      <label className="gs-drop" style={{ display: 'block', margin: '0 0 12px' }}>
+        {cover ? `Portada: ${cover.name}` : 'Portada de la canción (opcional, JPG, PNG o WebP)'}
+        <input type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={(event) => setCover(event.target.files?.[0] || null)} />
       </label>
       <label className="gs-field"><span>Título</span><input required value={title} onChange={(event) => setTitle(event.target.value)} maxLength={120} /></label>
       <label className="gs-field"><span>Titular de los derechos</span><input required value={holder} onChange={(event) => setHolder(event.target.value)} maxLength={120} placeholder="Nombre de la banda o del autor" /></label>

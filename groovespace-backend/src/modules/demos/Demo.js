@@ -29,6 +29,8 @@ const demoSchema = new mongoose.Schema({
   published: { type: Boolean, default: false, index: true },
   publishedAt: Date,
   lyrics: { type: String, default: '', maxlength: 8000 },
+  // Portada de la canción (ruta pública de imágenes); vacía = carátula generada en la app.
+  coverPath: { type: String, default: '' },
   listens: [{ _id: false, at: Date }],
   review: {
     status: { type: String, enum: ['new', 'listened', 'accepted', 'needs_changes', 'declined'], default: 'new' },

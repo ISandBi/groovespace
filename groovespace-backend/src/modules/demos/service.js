@@ -8,6 +8,7 @@ const { signToken, verifyToken, deriveSecret } = require('../../lib/token');
 const { HttpError, assert, cleanString, isObjectId } = require('../../lib/http');
 const { engineers } = require('../../config/engineers');
 const { notify } = require('../notifications/service');
+const images = require('../images');
 
 const MAX_DEMOS_PER_BAND = 12;
 const streamSecret = () => deriveSecret(process.env.BAND_TOKEN_SECRET, 'demo-stream');
@@ -70,7 +71,20 @@ exports.remove = async ({ bandId, id }) => {
   const demo = await loadDemo(id);
   assert(String(demo.bandId) === String(bandId), 403, 'Este demo no pertenece a tu banda.');
   await storage.remove(demo.storageKey);
+  await images.removeImage(demo.coverPath);
   await demo.deleteOne();
+};
+
+/** Portada de una canción de la banda: se guarda como imagen y reemplaza la anterior. */
+exports.setCover = async ({ bandId, id, file }) => {
+  assert(file, 400, 'Selecciona una imagen (.jpg, .png o .webp).');
+  const demo = await loadDemo(id);
+  assert(String(demo.bandId) === String(bandId), 403, 'Este demo no pertenece a tu banda.');
+  const previous = demo.coverPath;
+  const coverPath = await images.saveImage(file);
+  await Demo.updateOne({ _id: demo._id }, { $set: { coverPath } });
+  await images.removeImage(previous);
+  return { id: String(demo._id), coverPath };
 };
 
 /** El ingeniero firma el acuerdo; GrooveSpace contrafirma automáticamente (firma simulada). */
