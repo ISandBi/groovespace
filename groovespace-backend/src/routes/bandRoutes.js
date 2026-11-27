@@ -1,13 +1,13 @@
 const express = require('express');
 const bandController = require('../controllers/bandController');
-const upload = require('../middlewares/upload');
+const imageUpload = require('../middlewares/imageUpload');
 const { requireStaff } = require('../middlewares/staffAuth');
 const { requireBand } = require('../middlewares/bandAuth');
 const rateLimit = require('../middlewares/rateLimit');
 
 const router = express.Router();
 
-router.post('/register', rateLimit(15 * 60 * 1000, 5), upload.fields([
+router.post('/register', rateLimit(15 * 60 * 1000, 5), imageUpload.fields([
 	{ name: 'logo', maxCount: 1 },
 	{ name: 'instrumentPhotos', maxCount: 12 }
 ]), bandController.registerBand);
@@ -21,9 +21,11 @@ router.get('/email-domains', bandController.getBandEmailDomains);
 router.post('/invite', requireBand, bandController.createInvite);
 router.get('/invite/:token', bandController.getInvite);
 router.post('/invite/:token/members', bandController.joinBand);
+router.get('/media/:file', bandController.getBandImage);
+router.patch('/:bandId/logo', requireBand, imageUpload.single('logo'), bandController.updateBandLogo);
 router.get('/:bandId/profile', requireBand, bandController.getBandProfile);
 router.patch('/:bandId/profile', requireBand, bandController.updateBandProfile);
-router.post('/:bandId/instruments', requireBand, upload.fields([{ name: 'instrumentPhotos', maxCount: 12 }]), bandController.addBandInstruments);
+router.post('/:bandId/instruments', requireBand, imageUpload.fields([{ name: 'instrumentPhotos', maxCount: 12 }]), bandController.addBandInstruments);
 router.delete('/:bandId/members/:memberId', requireBand, bandController.removeBandMember);
 
 module.exports = router;

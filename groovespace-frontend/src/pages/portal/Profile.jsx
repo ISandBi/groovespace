@@ -28,10 +28,24 @@ export default function Profile({ actor }) {
     try { await api(`/bands/${actor.bandId}/instruments`, { method: 'POST', token: actor.token, form }); toast('Instrumento agregado: ya puedes verlo en 3D en tu sala'); setNewInstrument({ name: '', file: null }); profile.reload(); } catch (requestError) { setError(requestError.message); }
   };
 
+  const changeLogo = async (file) => {
+    if (!file) return;
+    const form = new FormData(); form.append('logo', file);
+    setError('');
+    try { await api(`/bands/${actor.bandId}/logo`, { method: 'PATCH', token: actor.token, form }); toast('Logo actualizado'); profile.reload(); } catch (requestError) { setError(requestError.message); }
+  };
+
   if (me.loading || profile.loading) return <Skeleton />;
   return (
     <div style={{ display: 'grid', gap: 18 }}>
       <ErrorNote error={error} />
+      {actor.role === 'lider' && profile.data && (
+        <div className="gs-card"><h2 className="gs-h2">Logo de la banda</h2>
+          <p className="gs-hint">Se muestra en tu perfil, en el directorio público y en la app móvil. Formatos: .jpg, .png o .webp (máximo 10 MB).</p>
+          <div style={{ display: 'flex', gap: 14, alignItems: 'center', margin: '12px 0' }}><img src={assetUrl(profile.data.logoPath)} alt="Logo de la banda" width="96" height="96" style={{ objectFit: 'cover' }} /></div>
+          <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => { changeLogo(event.target.files?.[0]); event.target.value = ''; }} />
+        </div>
+      )}
       {epk ? (
         <div className="gs-card">
           <div className="gs-row" style={{ justifyContent: 'space-between' }}><h2 className="gs-h2" style={{ margin: 0 }}>Perfil público (EPK)</h2>{epk.isPublic && epk.slug && <Link to={`/b/${epk.slug}`} className="gs-btn gs-btn--sm">Ver mi página pública</Link>}</div>
